@@ -7,15 +7,24 @@ import { Register } from "./pages/register"
 import { NotFound } from "./pages/not-found"
 import { Unauthorized } from "./pages/unauthorized"
 import { Users } from "./pages/users"
+import { CreateUser } from "./pages/users/create"
+import { EditUser } from "./pages/users/edit"
+import { AssignRole } from "./pages/users/assign-role"
+import { AssignPermissions } from "./pages/users/assign-permissions"
 import { Settings } from "./pages/settings"
+import { CreateRole } from "./pages/settings/create-role"
+import { EditRole } from "./pages/settings/edit-role"
+import { AssignPermissionsToRole } from "./pages/settings/assign-permissions"
 import { Specialties } from "./pages/healthcare/specialties"
-import { Clinics } from "./pages/healthcare/clinics"
-import { Doctors } from "./pages/healthcare/doctors"
-import { Patients } from "./pages/healthcare/patients"
-import { Appointments } from "./pages/healthcare/appointments"
-import { Visits } from "./pages/healthcare/visits"
-import { Prescriptions } from "./pages/healthcare/prescriptions"
-import { LabTests } from "./pages/healthcare/lab-tests"
+import { CreateSpecialty } from "./pages/healthcare/specialties/create"
+import { EditSpecialty } from "./pages/healthcare/specialties/edit"
+import { Clinics, CreateClinic, EditClinic, ClinicDetails } from "./pages/healthcare/clinics"
+import { Doctors, CreateDoctor, EditDoctor, DoctorDetails, AssignClinics as AssignDoctorClinics, ManageSchedule } from "./pages/healthcare/doctors"
+import { Patients, CreatePatient, EditPatient, PatientDetails, UploadDocument } from "./pages/healthcare/patients"
+import { Appointments, CreateAppointment, EditAppointment, CancelAppointment } from "./pages/healthcare/appointments"
+import { LabTests, CreateLabTest, EditLabTest, ViewLabTestResults, UploadLabTestResults } from "./pages/healthcare/lab-tests"
+import { Prescriptions, CreatePrescription, EditPrescription, ViewPrescription } from "./pages/healthcare/prescriptions"
+import { Visits, CreateVisit, EditVisit, VisitDetails, CompleteVisit } from "./pages/healthcare/visits"
 
 function App() {
   return (
@@ -42,10 +51,66 @@ function App() {
             }
           />
           <Route
+            path="/users/create"
+            element={
+              <ProtectedRoute>
+                <CreateUser />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/:userId/edit"
+            element={
+              <ProtectedRoute>
+                <EditUser />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/:userId/assign-role"
+            element={
+              <ProtectedRoute>
+                <AssignRole />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/:userId/assign-permissions"
+            element={
+              <ProtectedRoute>
+                <AssignPermissions />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/settings"
             element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/roles/create"
+            element={
+              <ProtectedRoute>
+                <CreateRole />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/roles/:roleId/edit"
+            element={
+              <ProtectedRoute>
+                <EditRole />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/roles/:roleId/assign-permissions"
+            element={
+              <ProtectedRoute>
+                <AssignPermissionsToRole />
               </ProtectedRoute>
             }
           />
@@ -58,10 +123,50 @@ function App() {
             }
           />
           <Route
+            path="/healthcare/specialties/create"
+            element={
+              <ProtectedRoute>
+                <CreateSpecialty />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/specialties/:specialtyId/edit"
+            element={
+              <ProtectedRoute>
+                <EditSpecialty />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/healthcare/clinics"
             element={
               <ProtectedRoute>
                 <Clinics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/clinics/create"
+            element={
+              <ProtectedRoute>
+                <CreateClinic />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/clinics/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditClinic />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/clinics/:id/details"
+            element={
+              <ProtectedRoute>
+                <ClinicDetails />
               </ProtectedRoute>
             }
           />
@@ -74,10 +179,82 @@ function App() {
             }
           />
           <Route
+            path="/healthcare/doctors/create"
+            element={
+              <ProtectedRoute>
+                <CreateDoctor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/doctors/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditDoctor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/doctors/:id/details"
+            element={
+              <ProtectedRoute>
+                <DoctorDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/doctors/:id/assign-clinics"
+            element={
+              <ProtectedRoute>
+                <AssignDoctorClinics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/doctors/:id/schedule"
+            element={
+              <ProtectedRoute>
+                <ManageSchedule />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/healthcare/patients"
             element={
               <ProtectedRoute>
                 <Patients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/patients/create"
+            element={
+              <ProtectedRoute>
+                <CreatePatient />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/patients/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditPatient />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/patients/:id/details"
+            element={
+              <ProtectedRoute>
+                <PatientDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/patients/:id/upload-document"
+            element={
+              <ProtectedRoute>
+                <UploadDocument />
               </ProtectedRoute>
             }
           />
@@ -90,10 +267,138 @@ function App() {
             }
           />
           <Route
+            path="/healthcare/appointments/create"
+            element={
+              <ProtectedRoute>
+                <CreateAppointment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/appointments/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditAppointment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/appointments/:id/cancel"
+            element={
+              <ProtectedRoute>
+                <CancelAppointment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/prescriptions"
+            element={
+              <ProtectedRoute>
+                <Prescriptions />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/prescriptions/create"
+            element={
+              <ProtectedRoute>
+                <CreatePrescription />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/prescriptions/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditPrescription />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/prescriptions/:id/view"
+            element={
+              <ProtectedRoute>
+                <ViewPrescription />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/lab-tests"
+            element={
+              <ProtectedRoute>
+                <LabTests />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/lab-tests/create"
+            element={
+              <ProtectedRoute>
+                <CreateLabTest />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/lab-tests/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditLabTest />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/lab-tests/:id/view-results"
+            element={
+              <ProtectedRoute>
+                <ViewLabTestResults />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/lab-tests/:id/upload-results"
+            element={
+              <ProtectedRoute>
+                <UploadLabTestResults />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/healthcare/visits"
             element={
               <ProtectedRoute>
                 <Visits />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/visits/create"
+            element={
+              <ProtectedRoute>
+                <CreateVisit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/visits/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditVisit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/visits/:id/details"
+            element={
+              <ProtectedRoute>
+                <VisitDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/visits/:id/complete"
+            element={
+              <ProtectedRoute>
+                <CompleteVisit />
               </ProtectedRoute>
             }
           />
