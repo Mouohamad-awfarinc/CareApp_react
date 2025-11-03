@@ -112,10 +112,11 @@ export function Settings() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-          <p className="text-muted-foreground">
-            Manage roles, permissions, and access control
+        <div className="relative">
+          <div className="accent-line-green" />
+          <h1 className="text-3xl font-bold tracking-tight text-gradient-mixed">Settings & Access Control</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage roles, permissions, and access control across the platform
           </p>
         </div>
 

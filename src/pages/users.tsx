@@ -194,13 +194,14 @@ export function Users() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Users</h1>
-            <p className="text-muted-foreground">
-              Manage your users and their permissions
+          <div className="relative">
+            <div className="accent-line-green" />
+            <h1 className="text-3xl font-bold tracking-tight text-gradient-mixed">Users Management</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your users and their permissions across the platform
             </p>
           </div>
-          <Button onClick={handleOpenUserDialog}>
+          <Button onClick={handleOpenUserDialog} className="shadow-lg hover:shadow-secondary/20">
             <Plus className="mr-2 h-4 w-4" />
             Add User
           </Button>

@@ -292,11 +292,12 @@ export function Patients() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Patients</h1>
-            <p className="text-muted-foreground">Manage patient records</p>
+          <div className="relative">
+            <div className="accent-line-green" />
+            <h1 className="text-3xl font-bold tracking-tight text-gradient-mixed">Patients Management</h1>
+            <p className="text-muted-foreground mt-1">Manage patient records and medical information</p>
           </div>
-          <Button onClick={() => handleOpenPatientDialog()}>
+          <Button onClick={() => handleOpenPatientDialog()} className="shadow-lg hover:shadow-secondary/20">
             <Plus className="mr-2 h-4 w-4" />
             Add Patient
           </Button>

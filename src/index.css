@@ -3,65 +3,114 @@
 @tailwind utilities;
 
 @layer base {
-:root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+  :root {
+    /* Care App Brand Colors - Light Mode */
+    --care-blue: 203 100% 25%;           /* #004080 - Primary Brand Blue */
+    --care-green: 149 100% 33%;          /* #00A651 - Primary Brand Green */
+    --care-blue-light: 203 90% 45%;      /* Lighter blue for highlights */
+    --care-green-light: 149 80% 55%;     /* Lighter green for highlights */
+    --care-blue-dark: 203 100% 15%;      /* Darker blue for depth */
+    
+    /* Main Theme Variables */
+    --background: 210 40% 98%;            /* Soft white background */
+    --foreground: 203 40% 15%;            /* Dark blue-grey text */
+    --card: 0 0% 100%;                    /* Pure white cards */
+    --card-foreground: 203 40% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 203 40% 15%;
+    
+    /* Primary - Care Blue */
+    --primary: 203 100% 25%;              /* #004080 */
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary - Care Green (MORE PROMINENT) */
+    --secondary: 149 100% 33%;            /* #00A651 */
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Accent - Light Green (ENHANCED) */
+    --accent: 149 90% 95%;                /* Lighter green background */
+    --accent-foreground: 149 100% 25%;    /* Darker green text */
+    
+    --muted: 210 40% 96%;
+    --muted-foreground: 149 30% 40%;      /* Green-tinted muted text */
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 96%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 93.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 88%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-}
+    --destructive-foreground: 0 0% 100%;
+    --border: 149 30% 90%;                /* Green-tinted borders */
+    --input: 149 30% 90%;                 /* Green-tinted inputs */
+    --ring: 149 100% 33%;                 /* Green ring focus */
+    --radius: 1rem;                       /* Rounded corners for friendly feel */
+    
+    /* Sidebar with Blue Gradient */
+    --sidebar-background: 203 100% 25%;   /* Care Blue base */
+    --sidebar-foreground: 0 0% 100%;      /* White text */
+    --sidebar-primary: 149 100% 33%;      /* Green for active items */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 149 90% 35%;        /* GREEN for hover instead of blue */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 149 100% 20%;       /* Green border */
+    --sidebar-ring: 149 100% 33%;         /* Green ring */
+    
+    /* Success States - Green */
+    --success: 149 100% 33%;
+    --success-foreground: 0 0% 100%;
+    
+    /* Chart Colors - MORE GREEN */
+    --chart-1: 149 100% 33%;              /* Green primary */
+    --chart-2: 149 80% 45%;               /* Light Green */
+    --chart-3: 203 100% 25%;              /* Blue */
+    --chart-4: 149 60% 55%;               /* Lighter Green */
+    --chart-5: 149 100% 40%;              /* Green variation */
+  }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    /* Care App Brand Colors - Dark Mode */
+    --background: 203 40% 8%;             /* Deep blue-black */
+    --foreground: 210 40% 98%;            /* Nearly white text */
+    --card: 203 35% 12%;                  /* Dark blue-grey cards */
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 203 35% 12%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-    --sidebar-background: 240 5.9% 12%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    
+    /* Primary - Lighter Care Blue for dark mode */
+    --primary: 203 90% 45%;               /* Lighter blue in dark mode */
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary - Care Green (BRIGHTER in dark) */
+    --secondary: 149 85% 50%;             /* Brighter green for dark mode */
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Accent - Dark Green Tint (ENHANCED) */
+    --accent: 149 70% 20%;                /* Darker green background */
+    --accent-foreground: 149 85% 85%;     /* Light green text */
+    
+    --muted: 203 35% 20%;
+    --muted-foreground: 149 30% 60%;      /* Green-tinted muted text */
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 149 35% 25%;                /* Green-tinted borders */
+    --input: 149 35% 25%;                 /* Green-tinted inputs */
+    --ring: 149 85% 50%;                  /* Bright green ring focus */
+    
+    /* Dark Sidebar with Deep Blue Gradient */
+    --sidebar-background: 203 60% 10%;    /* Deep blue */
+    --sidebar-foreground: 210 40% 98%;    /* Nearly white text */
+    --sidebar-primary: 149 85% 50%;       /* Bright green for active */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 17.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 17.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 149 70% 25%;        /* GREEN for hover in dark mode */
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 149 80% 15%;        /* Green border */
+    --sidebar-ring: 149 85% 50%;          /* Bright green ring */
+    
+    /* Success States - Green */
+    --success: 149 85% 50%;
+    --success-foreground: 0 0% 100%;
+    
+    /* Chart Colors - MORE GREEN in dark mode */
+    --chart-1: 149 85% 50%;               /* Green primary */
+    --chart-2: 149 75% 60%;               /* Light Green */
+    --chart-3: 203 90% 45%;               /* Blue */
+    --chart-4: 149 65% 65%;               /* Lighter Green */
+    --chart-5: 149 80% 55%;               /* Green variation */
   }
 }
 
@@ -69,7 +118,176 @@
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Care App Brand Gradients */
+  .bg-care-gradient {
+    background: linear-gradient(135deg, hsl(var(--care-blue)) 0%, hsl(var(--care-blue-dark)) 100%);
+  }
+  
+  .bg-care-gradient-green {
+    background: linear-gradient(135deg, hsl(var(--care-green)) 0%, hsl(var(--care-green-light)) 100%);
+  }
+  
+  .bg-care-gradient-mixed {
+    background: linear-gradient(135deg, hsl(var(--care-blue)) 0%, hsl(var(--care-green)) 100%);
+  }
+  
+  /* Subtle gradient overlays - MORE GREEN */
+  .bg-care-subtle-blue {
+    background: linear-gradient(180deg, hsl(var(--care-blue) / 0.03) 0%, transparent 100%);
+  }
+  
+  .bg-care-subtle-green {
+    background: linear-gradient(180deg, hsl(var(--care-green) / 0.08) 0%, hsl(var(--care-green) / 0.02) 100%);
+  }
+  
+  /* Green glow effect for wellness/tech feel - ENHANCED */
+  .glow-green {
+    box-shadow: 0 0 25px hsl(var(--care-green) / 0.4), 0 0 50px hsl(var(--care-green) / 0.15);
+  }
+  
+  .glow-green-sm {
+    box-shadow: 0 0 15px hsl(var(--care-green) / 0.3), 0 0 30px hsl(var(--care-green) / 0.1);
+  }
+  
+  /* Hover glow animation - STRONGER */
+  .hover-glow-green {
+    transition: box-shadow 0.3s ease-in-out, transform 0.2s ease-in-out;
+  }
+  
+  .hover-glow-green:hover {
+    box-shadow: 0 0 25px hsl(var(--care-green) / 0.5), 0 0 50px hsl(var(--care-green) / 0.2);
+    transform: translateY(-1px);
+  }
+  
+  /* Premium card styles */
+  .care-card {
+    @apply bg-card rounded-2xl shadow-lg border border-border/50 backdrop-blur-sm;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .care-card:hover {
+    @apply shadow-xl;
+    transform: translateY(-2px);
+  }
+  
+  /* Accent line - green highlight */
+  .accent-line-green {
+    position: relative;
+  }
+  
+  .accent-line-green::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, hsl(var(--care-green)) 0%, hsl(var(--care-green-light)) 100%);
+    border-radius: 0 4px 4px 0;
+  }
+  
+  /* Success indicator with green */
+  .success-badge {
+    @apply bg-secondary/10 text-secondary border border-secondary/20 px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  /* Premium button styles */
+  .btn-care-primary {
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl px-6 py-3 font-semibold transition-all duration-200;
+    box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
+  }
+  
+  .btn-care-primary:hover {
+    box-shadow: 0 6px 16px hsl(var(--primary) / 0.4);
+    transform: translateY(-1px);
+  }
+  
+  .btn-care-secondary {
+    @apply bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-xl px-6 py-3 font-semibold transition-all duration-200;
+    box-shadow: 0 4px 12px hsl(var(--secondary) / 0.3);
+  }
+  
+  .btn-care-secondary:hover {
+    box-shadow: 0 6px 16px hsl(var(--secondary) / 0.4);
+    transform: translateY(-1px);
+  }
+}
+
+@layer utilities {
+  /* Text gradients for brand colors */
+  .text-gradient-blue {
+    background: linear-gradient(135deg, hsl(var(--care-blue)) 0%, hsl(var(--care-blue-light)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-green {
+    background: linear-gradient(135deg, hsl(var(--care-green)) 0%, hsl(var(--care-green-light)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-mixed {
+    background: linear-gradient(135deg, hsl(var(--care-blue)) 0%, hsl(var(--care-green)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  
+  .animate-glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes glowPulse {
+    0%, 100% {
+      box-shadow: 0 0 10px hsl(var(--care-green) / 0.2);
+    }
+    50% {
+      box-shadow: 0 0 20px hsl(var(--care-green) / 0.4), 0 0 40px hsl(var(--care-green) / 0.2);
+    }
   }
 }

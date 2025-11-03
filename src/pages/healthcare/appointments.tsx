@@ -192,11 +192,12 @@ export function Appointments() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Appointments</h1>
-            <p className="text-muted-foreground">Manage patient appointments</p>
+          <div className="relative">
+            <div className="accent-line-green" />
+            <h1 className="text-3xl font-bold text-gradient-mixed">Appointments Management</h1>
+            <p className="text-muted-foreground mt-1">Manage patient appointments and scheduling</p>
           </div>
-          <Button onClick={() => handleOpenDialog()}>
+          <Button onClick={() => handleOpenDialog()} className="shadow-lg hover:shadow-secondary/20">
             <Plus className="mr-2 h-4 w-4" />
             New Appointment
           </Button>
