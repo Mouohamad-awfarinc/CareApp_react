@@ -157,6 +157,21 @@ export interface Specialty {
   doctors?: Doctor[]
 }
 
+export interface Medicine {
+  id: number
+  name: string
+  description: string | null
+  dosage_form: string | null
+  strength: string | null
+  manufacturer: string | null
+  category: string | null
+  is_active: boolean
+  doctors_count?: number
+  preferred_doctors_count?: number
+  created_at: string
+  updated_at: string
+}
+
 export interface Clinic {
   id: number
   name: string
@@ -375,6 +390,35 @@ export interface UpdatePatientRequest {
   emergency_contact_mobile?: string | null
   longitude?: string | null
   latitude?: string | null
+}
+
+export interface CreateMedicineRequest {
+  name: string
+  description?: string | null
+  dosage_form?: string | null
+  strength?: string | null
+  manufacturer?: string | null
+  category?: string | null
+  is_active?: boolean
+}
+
+export interface UpdateMedicineRequest {
+  name?: string
+  description?: string | null
+  dosage_form?: string | null
+  strength?: string | null
+  manufacturer?: string | null
+  category?: string | null
+  is_active?: boolean
+}
+
+export interface DoctorPreferredMedicine {
+  medicine_id: number
+  notes?: string | null
+}
+
+export interface UpdateDoctorPreferredMedicinesRequest {
+  medicines: DoctorPreferredMedicine[]
 }
 
 // Healthcare Response types

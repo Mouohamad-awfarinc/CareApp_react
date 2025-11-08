@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ArrowLeft, UserPlus, Building2 } from "lucide-react"
+import { ArrowLeft, UserPlus, Building2, Pill } from "lucide-react"
 import { useDoctor, useDoctorPatients, useDoctorClinics } from "@/hooks/use-healthcare"
 import { Pagination } from "@/components/data-table/pagination"
 import { Badge } from "@/components/ui/badge"
@@ -170,6 +170,30 @@ export function DoctorDetails() {
                 </TableBody>
               </Table>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Preferred Medicines */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Pill className="h-5 w-5" />
+                <CardTitle>Preferred Medicines</CardTitle>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/healthcare/doctors/${doctorId}/preferred-medicines`)}
+              >
+                Manage Preferred Medicines
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Manage the medicines that this doctor frequently prescribes and prefers to use.
+            </p>
           </CardContent>
         </Card>
 

@@ -25,6 +25,12 @@ import { Appointments, CreateAppointment, EditAppointment, CancelAppointment } f
 import { LabTests, CreateLabTest, EditLabTest, ViewLabTestResults, UploadLabTestResults } from "./pages/healthcare/lab-tests"
 import { Prescriptions, CreatePrescription, EditPrescription, ViewPrescription } from "./pages/healthcare/prescriptions"
 import { Visits, CreateVisit, EditVisit, VisitDetails, CompleteVisit } from "./pages/healthcare/visits"
+import { Medicines } from "./pages/healthcare/medicines/index"
+import { CreateMedicine } from "./pages/healthcare/medicines/create"
+import { MedicineDetails } from "./pages/healthcare/medicines/details"
+import { EditMedicine } from "./pages/healthcare/medicines/edit"
+import { DoctorPreferredMedicines } from "./pages/healthcare/doctors/preferred-medicines"
+import { MyMedicines } from "./pages/healthcare/my-medicines"
 
 function App() {
   return (
@@ -403,18 +409,50 @@ function App() {
             }
           />
           <Route
-            path="/healthcare/prescriptions"
+            path="/healthcare/medicines"
             element={
               <ProtectedRoute>
-                <Prescriptions />
+                <Medicines />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/healthcare/lab-tests"
+            path="/healthcare/medicines/create"
             element={
               <ProtectedRoute>
-                <LabTests />
+                <CreateMedicine />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/medicines/:id"
+            element={
+              <ProtectedRoute>
+                <MedicineDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/medicines/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditMedicine />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/doctors/:id/preferred-medicines"
+            element={
+              <ProtectedRoute>
+                <DoctorPreferredMedicines />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/my-medicines"
+            element={
+              <ProtectedRoute>
+                <MyMedicines />
               </ProtectedRoute>
             }
           />

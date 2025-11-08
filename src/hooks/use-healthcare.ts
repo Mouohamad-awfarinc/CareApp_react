@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { healthcareService } from "@/services/healthcare"
 import type {
@@ -9,6 +10,9 @@ import type {
   UpdateDoctorRequest,
   CreatePatientRequest,
   UpdatePatientRequest,
+  CreateMedicineRequest,
+  UpdateMedicineRequest,
+  UpdateDoctorPreferredMedicinesRequest,
 } from "@/types"
 
 // Specialties hooks
@@ -705,6 +709,117 @@ export function useDeleteLabTest() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lab-tests"] })
       queryClient.invalidateQueries({ queryKey: ["visit-lab-tests"] })
+    },
+  })
+}
+
+// Medicines hooks
+export function useMedicines(
+  page: number = 1,
+  filters?: {
+    search?: string
+    category?: string
+    dosage_form?: string
+    manufacturer?: string
+    is_active?: boolean
+  }
+) {
+  return useQuery({
+    queryKey: ["medicines", page, filters],
+    queryFn: () => healthcareService.getMedicines(page, filters),
+  })
+}
+
+export function useMedicine(id: number) {
+  return useQuery({
+    queryKey: ["medicine", id],
+    queryFn: () => healthcareService.getMedicineById(id),
+    enabled: !!id,
+  })
+}
+
+export function useCreateMedicine() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: CreateMedicineRequest) => healthcareService.createMedicine(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicines"] })
+    },
+  })
+}
+
+export function useUpdateMedicine() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UpdateMedicineRequest }) =>
+      healthcareService.updateMedicine(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["medicines"] })
+      queryClient.invalidateQueries({ queryKey: ["medicine", variables.id] })
+    },
+  })
+}
+
+export function useDeleteMedicine() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: number) => healthcareService.deleteMedicine(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicines"] })
+    },
+  })
+}
+
+// Doctor Preferred Medicines hooks
+export function useDoctorPreferredMedicines(doctorId: number) {
+  return useQuery({
+    queryKey: ["doctor-preferred-medicines", doctorId],
+    queryFn: () => healthcareService.getDoctorPreferredMedicines(doctorId),
+    enabled: !!doctorId,
+  })
+}
+
+export function useUpdateDoctorPreferredMedicines() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ doctorId, data }: { doctorId: number; data: UpdateDoctorPreferredMedicinesRequest }) =>
+      healthcareService.updateDoctorPreferredMedicines(doctorId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["doctor-preferred-medicines", variables.doctorId] })
+      queryClient.invalidateQueries({ queryKey: ["doctors"] })
+      queryClient.invalidateQueries({ queryKey: ["doctor", variables.doctorId] })
+    },
+  })
+}
+
+export function useAddDoctorPreferredMedicine() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ doctorId, medicineId }: { doctorId: number; medicineId: number }) =>
+      healthcareService.addDoctorPreferredMedicine(doctorId, medicineId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["doctor-preferred-medicines", variables.doctorId] })
+      queryClient.invalidateQueries({ queryKey: ["doctors"] })
+      queryClient.invalidateQueries({ queryKey: ["doctor", variables.doctorId] })
+    },
+  })
+}
+
+export function useRemoveDoctorPreferredMedicine() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ doctorId, medicineId }: { doctorId: number; medicineId: number }) =>
+      healthcareService.removeDoctorPreferredMedicine(doctorId, medicineId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["doctor-preferred-medicines", variables.doctorId] })
+      queryClient.invalidateQueries({ queryKey: ["doctors"] })
+      queryClient.invalidateQueries({ queryKey: ["doctor", variables.doctorId] })
     },
   })
 }

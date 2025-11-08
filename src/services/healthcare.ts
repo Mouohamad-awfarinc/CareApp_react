@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "./api"
 import type {
   Specialty,
@@ -5,6 +6,7 @@ import type {
   Doctor,
   Patient,
   PatientProfile,
+  Medicine,
   CreateSpecialtyRequest,
   UpdateSpecialtyRequest,
   CreateClinicRequest,
@@ -13,6 +15,9 @@ import type {
   UpdateDoctorRequest,
   CreatePatientRequest,
   UpdatePatientRequest,
+  CreateMedicineRequest,
+  UpdateMedicineRequest,
+  UpdateDoctorPreferredMedicinesRequest,
   HealthcarePaginatedResponse,
 } from "@/types"
 
@@ -819,6 +824,109 @@ export const healthcareService = {
   deleteLabTest: async (id: number): Promise<{ message: string }> => {
     const response = await apiClient.delete<{ success: boolean; message: string }>(
       `/healthcare/lab-tests/${id}`
+    )
+    return response.data
+  },
+
+  // Medicines
+  getMedicines: async (
+    page: number = 1,
+    filters?: {
+      search?: string
+      category?: string
+      dosage_form?: string
+      manufacturer?: string
+      is_active?: boolean
+    }
+  ): Promise<HealthcarePaginatedResponse<Medicine>> => {
+    const params = new URLSearchParams()
+    params.append("page", page.toString())
+    if (filters?.search && filters.search !== "") {
+      params.append("search", filters.search)
+    }
+    if (filters?.category) {
+      params.append("category", filters.category)
+    }
+    if (filters?.dosage_form) {
+      params.append("dosage_form", filters.dosage_form)
+    }
+    if (filters?.manufacturer) {
+      params.append("manufacturer", filters.manufacturer)
+    }
+    if (filters?.is_active !== undefined) {
+      params.append("is_active", filters.is_active.toString())
+    }
+    const response = await apiClient.get<HealthcarePaginatedResponse<Medicine>>(
+      `/healthcare/medicines?${params.toString()}`
+    )
+    return response.data
+  },
+
+  getMedicineById: async (id: number): Promise<Medicine> => {
+    const response = await apiClient.get<{ success: boolean; data: Medicine }>(
+      `/healthcare/medicines/${id}`
+    )
+    return response.data.data
+  },
+
+  createMedicine: async (data: CreateMedicineRequest): Promise<Medicine> => {
+    const response = await apiClient.post<{ success: boolean; data: Medicine }>(
+      "/healthcare/medicines",
+      data
+    )
+    return response.data.data
+  },
+
+  updateMedicine: async (id: number, data: UpdateMedicineRequest): Promise<Medicine> => {
+    const response = await apiClient.put<{ success: boolean; data: Medicine }>(
+      `/healthcare/medicines/${id}`,
+      data
+    )
+    return response.data.data
+  },
+
+  deleteMedicine: async (id: number): Promise<{ message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(
+      `/healthcare/medicines/${id}`
+    )
+    return response.data
+  },
+
+  // Doctor Preferred Medicines
+  getDoctorPreferredMedicines: async (doctorId: number): Promise<Medicine[]> => {
+    const response = await apiClient.get<{ success: boolean; data: Medicine[] }>(
+      `/healthcare/doctors/${doctorId}/preferred-medicines`
+    )
+    return response.data.data
+  },
+
+  updateDoctorPreferredMedicines: async (
+    doctorId: number,
+    data: UpdateDoctorPreferredMedicinesRequest
+  ): Promise<Doctor> => {
+    const response = await apiClient.post<{ success: boolean; data: Doctor }>(
+      `/healthcare/doctors/${doctorId}/preferred-medicines`,
+      data
+    )
+    return response.data.data
+  },
+
+  addDoctorPreferredMedicine: async (
+    doctorId: number,
+    medicineId: number
+  ): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ success: boolean; message: string }>(
+      `/healthcare/doctors/${doctorId}/preferred-medicines/${medicineId}`
+    )
+    return response.data
+  },
+
+  removeDoctorPreferredMedicine: async (
+    doctorId: number,
+    medicineId: number
+  ): Promise<{ message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(
+      `/healthcare/doctors/${doctorId}/preferred-medicines/${medicineId}`
     )
     return response.data
   },

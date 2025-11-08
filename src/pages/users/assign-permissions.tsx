@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { AppLayout } from "@/components/layout/app-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { AlertCircle, ArrowLeft } from "lucide-react"
+import { AlertCircle, ArrowLeft, ChevronDown, FolderOpen } from "lucide-react"
 import {
   useUsers,
 } from "@/hooks/use-users"
@@ -12,8 +12,8 @@ import {
   useAssignPermissionsToUser,
 } from "@/hooks/use-rbac"
 import type { Permission } from "@/types"
-import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 export function AssignPermissions() {
   const navigate = useNavigate()
@@ -31,6 +31,7 @@ export function AssignPermissions() {
     Array<{ id: number; allowed: boolean }>
   >([])
   const [error, setError] = useState("")
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (user?.permissions) {
@@ -50,6 +51,33 @@ export function AssignPermissions() {
     }
     const rolePermissionIds = user.role.permissions.map((p) => p.id)
     return permissions.filter((p) => !rolePermissionIds.includes(p.id))
+  }
+
+  // Group permissions by module
+  const groupPermissionsByModule = (permissions: Permission[]) => {
+    const grouped: Record<string, Permission[]> = {}
+    
+    permissions.forEach((permission) => {
+      const module = permission.module || 'General'
+      if (!grouped[module]) {
+        grouped[module] = []
+      }
+      grouped[module].push(permission)
+    })
+    
+    return grouped
+  }
+
+  const toggleModule = (module: string) => {
+    setExpandedModules((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(module)) {
+        newSet.delete(module)
+      } else {
+        newSet.add(module)
+      }
+      return newSet
+    })
   }
 
   const handleSubmit = async () => {
@@ -77,6 +105,7 @@ export function AssignPermissions() {
   }
 
   const nonRolePermissions = getNonRolePermissions()
+  const groupedPermissions = groupPermissionsByModule(nonRolePermissions)
 
   return (
     <AppLayout>
@@ -118,64 +147,84 @@ export function AssignPermissions() {
               </div>
             )}
 
-            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-3 max-h-[70vh] overflow-y-auto">
               {nonRolePermissions.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   All permissions are already granted by the user's role
                 </div>
               ) : (
-                nonRolePermissions.map((permission) => {
-                  const userPermission = selectedUserPermissions.find(
-                    (up) => up.id === permission.id
-                  )
-                  const isAllowed = userPermission?.allowed || false
-                  const isChecked = userPermission !== undefined
-
-                  return (
-                    <div
-                      key={permission.id}
-                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent cursor-pointer"
-                      onClick={() => {
-                        setSelectedUserPermissions((prev) => {
-                          if (isChecked && isAllowed) {
-                            return prev.filter((up) => up.id !== permission.id)
-                          } else {
-                            const filtered = prev.filter((up) => up.id !== permission.id)
-                            return [...filtered, { id: permission.id, allowed: true }]
-                          }
-                        })
-                      }}
-                    >
-                      <Checkbox
-                        checked={isChecked && isAllowed}
-                        onCheckedChange={(checked) => {
-                          setSelectedUserPermissions((prev) => {
-                            if (checked) {
-                              const filtered = prev.filter((up) => up.id !== permission.id)
-                              return [...filtered, { id: permission.id, allowed: true }]
-                            } else {
-                              return prev.filter((up) => up.id !== permission.id)
-                            }
-                          })
-                        }}
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium">{permission.name}</div>
-                        {permission.description && (
-                          <div className="text-sm text-muted-foreground">
-                            {permission.description}
+                Object.entries(groupedPermissions).map(([module, modulePermissions]) => (
+                  <Collapsible
+                    key={module}
+                    open={expandedModules.has(module)}
+                    onOpenChange={() => toggleModule(module)}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg cursor-pointer hover:bg-muted/70 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                          <div>
+                            <h3 className="font-semibold text-lg">{module}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {modulePermissions.length} permission{modulePermissions.length !== 1 ? 's' : ''}
+                            </p>
                           </div>
-                        )}
-                        {permission.module && (
-                          <Badge variant="secondary" className="mt-1">
-                            {permission.module}
-                          </Badge>
-                        )}
+                        </div>
+                        <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
                       </div>
-                    </div>
-                  )
-                })
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-2 mt-2">
+                      {modulePermissions.map((permission) => {
+                        const userPermission = selectedUserPermissions.find(
+                          (up) => up.id === permission.id
+                        )
+                        const isAllowed = userPermission?.allowed || false
+                        const isChecked = userPermission !== undefined
+
+                        return (
+                          <div
+                            key={permission.id}
+                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent cursor-pointer ml-8 border-l-2 border-muted"
+                            onClick={() => {
+                              setSelectedUserPermissions((prev) => {
+                                if (isChecked && isAllowed) {
+                                  return prev.filter((up) => up.id !== permission.id)
+                                } else {
+                                  const filtered = prev.filter((up) => up.id !== permission.id)
+                                  return [...filtered, { id: permission.id, allowed: true }]
+                                }
+                              })
+                            }}
+                          >
+                            <Checkbox
+                              checked={isChecked && isAllowed}
+                              onCheckedChange={(checked) => {
+                                setSelectedUserPermissions((prev) => {
+                                  if (checked) {
+                                    const filtered = prev.filter((up) => up.id !== permission.id)
+                                    return [...filtered, { id: permission.id, allowed: true }]
+                                  } else {
+                                    return prev.filter((up) => up.id !== permission.id)
+                                  }
+                                })
+                              }}
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium">{permission.name}</div>
+                              {permission.description && (
+                                <div className="text-sm text-muted-foreground">
+                                  {permission.description}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))
               )}
+
             </div>
 
             <div className="flex justify-end gap-2 mt-6">
