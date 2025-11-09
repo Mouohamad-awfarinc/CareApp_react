@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { healthcareService } from "@/services/healthcare"
+import { healthcareService, companyService } from "@/services/healthcare"
 import type {
   CreateSpecialtyRequest,
   UpdateSpecialtyRequest,
@@ -12,7 +12,10 @@ import type {
   UpdatePatientRequest,
   CreateMedicineRequest,
   UpdateMedicineRequest,
-  UpdateDoctorPreferredMedicinesRequest,
+  CreateCompanyRequest,
+  UpdateCompanyRequest,
+  DoctorPreferredMedicine,
+  ReviewDoctorRequest,
 } from "@/types"
 
 // Specialties hooks
@@ -163,6 +166,7 @@ export function useDoctors(
     clinic_id?: number
     city?: string
     is_verified?: boolean
+    review_status?: string
   }
 ) {
   return useQuery({
@@ -253,6 +257,80 @@ export function useAssignDoctorToClinics() {
       queryClient.invalidateQueries({ queryKey: ["doctors"] })
       queryClient.invalidateQueries({ queryKey: ["doctor", variables.doctorId] })
       queryClient.invalidateQueries({ queryKey: ["doctor-clinics", variables.doctorId] })
+    },
+  })
+}
+
+// Doctor-Clinic CRUD hooks
+export function useAllDoctorClinics(
+  page: number = 1,
+  filters?: {
+    doctor_id?: number
+    clinic_id?: number
+    active?: boolean
+  }
+) {
+  return useQuery({
+    queryKey: ["all-doctor-clinics", page, filters],
+    queryFn: () => healthcareService.getAllDoctorClinics(page, filters),
+  })
+}
+
+export function useDoctorClinic(id: number) {
+  return useQuery({
+    queryKey: ["doctor-clinic", id],
+    queryFn: () => healthcareService.getDoctorClinicById(id),
+    enabled: !!id,
+  })
+}
+
+export function useCreateDoctorClinic() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: any) => healthcareService.createDoctorClinic(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["all-doctor-clinics"] })
+      queryClient.invalidateQueries({ queryKey: ["doctor-clinics"] })
+    },
+  })
+}
+
+export function useUpdateDoctorClinic() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) =>
+      healthcareService.updateDoctorClinic(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["all-doctor-clinics"] })
+      queryClient.invalidateQueries({ queryKey: ["doctor-clinics"] })
+      queryClient.invalidateQueries({ queryKey: ["doctor-clinic", variables.id] })
+    },
+  })
+}
+
+export function useDeleteDoctorClinic() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: number) => healthcareService.deleteDoctorClinic(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["all-doctor-clinics"] })
+      queryClient.invalidateQueries({ queryKey: ["doctor-clinics"] })
+    },
+  })
+}
+
+export function useToggleDoctorClinicStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: number) => healthcareService.toggleDoctorClinicStatus(id),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["all-doctor-clinics"] })
+      queryClient.invalidateQueries({ queryKey: ["doctor-clinics"] })
+      queryClient.invalidateQueries({ queryKey: ["doctor-clinic", variables] })
     },
   })
 }
@@ -464,6 +542,40 @@ export function useDoctorClinicSchedules(filters?: any) {
   })
 }
 
+export function useCreateDoctorClinicSchedule() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: any) => healthcareService.createDoctorClinicSchedule(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doctor-clinic-schedules"] })
+    },
+  })
+}
+
+export function useUpdateDoctorClinicSchedule() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) =>
+      healthcareService.updateDoctorClinicSchedule(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doctor-clinic-schedules"] })
+    },
+  })
+}
+
+export function useDeleteDoctorClinicSchedule() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: number) => healthcareService.deleteDoctorClinicSchedule(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doctor-clinic-schedules"] })
+    },
+  })
+}
+
 // Appointments hooks
 export function useAppointments(page: number = 1, filters?: any) {
   return useQuery({
@@ -489,6 +601,14 @@ export function useCreateAppointment() {
       queryClient.invalidateQueries({ queryKey: ["appointments"] })
       queryClient.invalidateQueries({ queryKey: ["patient-appointments"] })
     },
+  })
+}
+
+export function useAvailableSlots(doctorId: number, clinicId: number, date: string) {
+  return useQuery({
+    queryKey: ["available-slots", doctorId, clinicId, date],
+    queryFn: () => healthcareService.getAvailableSlots(doctorId, clinicId, date),
+    enabled: !!doctorId && !!clinicId && !!date,
   })
 }
 
@@ -786,7 +906,7 @@ export function useUpdateDoctorPreferredMedicines() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ doctorId, data }: { doctorId: number; data: UpdateDoctorPreferredMedicinesRequest }) =>
+    mutationFn: ({ doctorId, data }: { doctorId: number; data: DoctorPreferredMedicine[] }) =>
       healthcareService.updateDoctorPreferredMedicines(doctorId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["doctor-preferred-medicines", variables.doctorId] })
@@ -820,6 +940,153 @@ export function useRemoveDoctorPreferredMedicine() {
       queryClient.invalidateQueries({ queryKey: ["doctor-preferred-medicines", variables.doctorId] })
       queryClient.invalidateQueries({ queryKey: ["doctors"] })
       queryClient.invalidateQueries({ queryKey: ["doctor", variables.doctorId] })
+    },
+  })
+}
+
+// Companies hooks
+export function useCompanies(
+  page: number = 1,
+  filters?: {
+    search?: string
+    city?: string
+    is_active?: boolean
+  }
+) {
+  return useQuery({
+    queryKey: ["companies", page, filters],
+    queryFn: () => companyService.getCompanies(page, filters),
+  })
+}
+
+export function useCompany(id: number) {
+  return useQuery({
+    queryKey: ["company", id],
+    queryFn: () => companyService.getCompanyById(id),
+    enabled: !!id,
+  })
+}
+
+export function useCreateCompany() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: CreateCompanyRequest) => companyService.createCompany(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] })
+    },
+  })
+}
+
+export function useUpdateCompany() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UpdateCompanyRequest }) =>
+      companyService.updateCompany(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] })
+      queryClient.invalidateQueries({ queryKey: ["company", variables.id] })
+    },
+  })
+}
+
+export function useUpdateCompanyLogo() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, logo }: { id: number; logo: File }) =>
+      companyService.updateCompanyLogo(id, logo),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] })
+      queryClient.invalidateQueries({ queryKey: ["company", variables.id] })
+    },
+  })
+}
+
+export function useDeleteCompany() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: number) => companyService.deleteCompany(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] })
+    },
+  })
+}
+
+export function useToggleCompanyStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: number) => companyService.toggleCompanyStatus(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] })
+    },
+  })
+}
+
+export function useCompanyClinics(id: number, page: number = 1) {
+  return useQuery({
+    queryKey: ["company-clinics", id, page],
+    queryFn: () => companyService.getCompanyClinics(id, page),
+    enabled: !!id,
+  })
+}
+
+export function useAssignClinicToCompany() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ companyId, clinicId }: { companyId: number; clinicId: number }) =>
+      companyService.assignClinicToCompany(companyId, clinicId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] })
+      queryClient.invalidateQueries({ queryKey: ["company", variables.companyId] })
+      queryClient.invalidateQueries({ queryKey: ["company-clinics", variables.companyId] })
+      queryClient.invalidateQueries({ queryKey: ["clinics"] })
+    },
+  })
+}
+
+export function useUnassignClinicFromCompany() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ companyId, clinicId }: { companyId: number; clinicId: number }) =>
+      companyService.unassignClinicFromCompany(companyId, clinicId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] })
+      queryClient.invalidateQueries({ queryKey: ["company", variables.companyId] })
+      queryClient.invalidateQueries({ queryKey: ["company-clinics", variables.companyId] })
+      queryClient.invalidateQueries({ queryKey: ["clinics"] })
+    },
+  })
+}
+
+// Pending Review Doctors hooks
+export function usePendingReviewDoctors(
+  page: number = 1,
+  filters?: {
+    search?: string
+    specialty_id?: number
+  }
+) {
+  return useQuery({
+    queryKey: ["pending-review-doctors", page, filters],
+    queryFn: () => healthcareService.getPendingReviewDoctors(page, filters),
+  })
+}
+
+export function useReviewDoctor() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ReviewDoctorRequest }) =>
+      healthcareService.reviewDoctor(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pending-review-doctors"] })
+      queryClient.invalidateQueries({ queryKey: ["doctors"] })
     },
   })
 }

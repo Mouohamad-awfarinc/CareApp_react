@@ -9,9 +9,7 @@ export function ViewPrescription() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
-  const { data: prescriptionData, isLoading } = usePrescription(Number(id));
-
-  const prescription = prescriptionData?.data;
+  const { data: prescription, isLoading } = usePrescription(Number(id));
 
   if (isLoading) {
     return (

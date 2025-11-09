@@ -11,8 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ArrowLeft, UserPlus, Building2, Pill } from "lucide-react"
-import { useDoctor, useDoctorPatients, useDoctorClinics } from "@/hooks/use-healthcare"
+import { ArrowLeft, UserPlus, Building2, Pill, Calendar } from "lucide-react"
+import { useDoctor, useDoctorPatients, useAllDoctorClinics } from "@/hooks/use-healthcare"
 import { Pagination } from "@/components/data-table/pagination"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -36,7 +36,7 @@ export function DoctorDetails() {
     doctorId,
     patientsPage
   )
-  const { data: doctorClinicsData } = useDoctorClinics(doctorId)
+  const { data: doctorClinicsData } = useAllDoctorClinics(1, { doctor_id: doctorId })
 
   if (isLoading) {
     return (
@@ -75,7 +75,17 @@ export function DoctorDetails() {
         {/* Doctor Info */}
         <Card>
           <CardHeader>
-            <CardTitle>Doctor Information</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Doctor Information</CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/healthcare/doctors/${doctorId}/schedule`)}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Manage Schedules
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4 mb-6">
@@ -136,34 +146,42 @@ export function DoctorDetails() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              <CardTitle>Clinics ({doctorClinicsData?.length || 0})</CardTitle>
+              <CardTitle>Clinic Associations ({doctorClinicsData?.data?.length || 0})</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            {!doctorClinicsData || doctorClinicsData.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">No clinics found</div>
+            {!doctorClinicsData?.data || doctorClinicsData.data.length === 0 ? (
+              <div className="text-center py-4 text-muted-foreground">No clinic associations found</div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
+                    <TableHead>Clinic Name</TableHead>
                     <TableHead>City</TableHead>
                     <TableHead>Category</TableHead>
+                    <TableHead>Fees</TableHead>
+                    <TableHead>Consultation Fees</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {doctorClinicsData.map((clinic) => (
-                    <TableRow key={clinic.id}>
-                      <TableCell className="font-medium">{clinic.name}</TableCell>
-                      <TableCell>{clinic.email}</TableCell>
-                      <TableCell>{clinic.city || "—"}</TableCell>
+                  {doctorClinicsData.data.map((association) => (
+                    <TableRow key={association.id}>
+                      <TableCell className="font-medium">{association.clinic?.name || "Unknown Clinic"}</TableCell>
+                      <TableCell>{association.clinic?.city || "—"}</TableCell>
                       <TableCell>
-                        {clinic.category ? (
-                          <Badge variant="secondary">{clinic.category}</Badge>
+                        {association.clinic?.category ? (
+                          <Badge variant="secondary">{association.clinic.category}</Badge>
                         ) : (
                           "—"
                         )}
+                      </TableCell>
+                      <TableCell>{association.fees ? `$${association.fees.toFixed(2)}` : "—"}</TableCell>
+                      <TableCell>{association.consultation_fees ? `$${association.consultation_fees.toFixed(2)}` : "—"}</TableCell>
+                      <TableCell>
+                        <Badge variant={association.active ? "default" : "secondary"}>
+                          {association.active ? "Active" : "Inactive"}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}

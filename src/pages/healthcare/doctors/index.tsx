@@ -45,6 +45,7 @@ export function Doctors() {
   const [searchQuery, setSearchQuery] = useState("")
   const debouncedSearch = useDebounce(searchQuery, 500)
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("all")
+  const [reviewStatusFilter, setReviewStatusFilter] = useState<string>("all")
 
   // Doctors
   const [doctorsPage, setDoctorsPage] = useState(1)
@@ -52,6 +53,7 @@ export function Doctors() {
     search: debouncedSearch || undefined,
     specialty_id:
       specialtyFilter && specialtyFilter !== "all" ? Number(specialtyFilter) : undefined,
+    review_status: reviewStatusFilter !== "all" ? reviewStatusFilter : undefined,
   })
   const deleteDoctor = useDeleteDoctor()
 
@@ -81,10 +83,15 @@ export function Doctors() {
             <h1 className="text-3xl font-bold tracking-tight">Doctors</h1>
             <p className="text-muted-foreground">Manage healthcare doctors</p>
           </div>
-          <Button onClick={() => navigate("/healthcare/doctors/create")}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Doctor
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate("/healthcare/doctors/review")} variant="outline">
+              Review Licenses
+            </Button>
+            <Button onClick={() => navigate("/healthcare/doctors/create")}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Doctor
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -116,6 +123,17 @@ export function Doctors() {
                   ))}
                 </SelectContent>
               </Select>
+              <Select value={reviewStatusFilter} onValueChange={setReviewStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Filter by review status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {loadingDoctors ? (
@@ -132,6 +150,7 @@ export function Doctors() {
                       <TableHead>Email</TableHead>
                       <TableHead>Specialty</TableHead>
                       <TableHead>Mobile</TableHead>
+                      <TableHead>Review Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -154,6 +173,17 @@ export function Doctors() {
                           )}
                         </TableCell>
                         <TableCell>{doctor.mobile || "—"}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              doctor.review_status === 'approved' ? 'default' :
+                              doctor.review_status === 'rejected' ? 'destructive' :
+                              'secondary'
+                            }
+                          >
+                            {doctor.review_status}
+                          </Badge>
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button

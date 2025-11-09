@@ -7,17 +7,24 @@ import type {
   Patient,
   PatientProfile,
   Medicine,
+  Company,
+  DoctorClinic,
   CreateSpecialtyRequest,
   UpdateSpecialtyRequest,
   CreateClinicRequest,
   UpdateClinicRequest,
   CreateDoctorRequest,
   UpdateDoctorRequest,
+  ReviewDoctorRequest,
   CreatePatientRequest,
   UpdatePatientRequest,
   CreateMedicineRequest,
   UpdateMedicineRequest,
-  UpdateDoctorPreferredMedicinesRequest,
+  CreateCompanyRequest,
+  UpdateCompanyRequest,
+  CreateDoctorClinicRequest,
+  UpdateDoctorClinicRequest,
+  DoctorPreferredMedicine,
   HealthcarePaginatedResponse,
 } from "@/types"
 
@@ -39,6 +46,116 @@ const toFormData = (data: Record<string, unknown>): FormData => {
     }
   })
   return formData
+}
+
+export const companyService = {
+  // Companies
+  getCompanies: async (
+    page: number = 1,
+    filters?: {
+      search?: string
+      is_active?: boolean
+      city?: string
+    }
+  ): Promise<HealthcarePaginatedResponse<Company>> => {
+    const params = new URLSearchParams()
+    params.append("page", page.toString())
+    if (filters?.search && filters.search !== "") {
+      params.append("search", filters.search)
+    }
+    if (filters?.is_active !== undefined) {
+      params.append("is_active", filters.is_active.toString())
+    }
+    if (filters?.city) {
+      params.append("city", filters.city)
+    }
+    const response = await apiClient.get<HealthcarePaginatedResponse<Company>>(
+      `/healthcare/companies?${params.toString()}`
+    )
+    return response.data
+  },
+
+  getCompanyById: async (id: number): Promise<Company> => {
+    const response = await apiClient.get<{ success: boolean; data: Company }>(
+      `/healthcare/companies/${id}`
+    )
+    return response.data.data
+  },
+
+  createCompany: async (data: CreateCompanyRequest): Promise<Company> => {
+    const formData = toFormData(data as unknown as Record<string, unknown>)
+    const response = await apiClient.post<{ success: boolean; data: Company }>(
+      "/healthcare/companies",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    )
+    return response.data.data
+  },
+
+  updateCompany: async (id: number, data: UpdateCompanyRequest): Promise<Company> => {
+    // Remove logo from data as it needs to be uploaded separately
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { logo, ...companyData } = data
+    const response = await apiClient.put<{ success: boolean; data: Company }>(
+      `/healthcare/companies/${id}`,
+      companyData
+    )
+    return response.data.data
+  },
+
+  updateCompanyLogo: async (id: number, logo: File): Promise<Company> => {
+    const formData = new FormData()
+    formData.append("logo", logo)
+    const response = await apiClient.post<{ success: boolean; data: Company }>(
+      `/healthcare/companies/${id}/logo`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    )
+    return response.data.data
+  },
+
+  deleteCompany: async (id: number): Promise<{ message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(
+      `/healthcare/companies/${id}`
+    )
+    return response.data
+  },
+
+  toggleCompanyStatus: async (id: number): Promise<Company> => {
+    const response = await apiClient.patch<{ success: boolean; data: Company }>(
+      `/healthcare/companies/${id}/toggle-status`
+    )
+    return response.data.data
+  },
+
+  getCompanyClinics: async (id: number, page: number = 1): Promise<HealthcarePaginatedResponse<Clinic>> => {
+    const response = await apiClient.get<HealthcarePaginatedResponse<Clinic>>(
+      `/healthcare/companies/${id}/clinics?page=${page}`
+    )
+    return response.data
+  },
+
+  assignClinicToCompany: async (companyId: number, clinicId: number): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ success: boolean; message: string }>(
+      `/healthcare/companies/${companyId}/assign-clinic/${clinicId}`
+    )
+    return response.data
+  },
+
+  unassignClinicFromCompany: async (companyId: number, clinicId: number): Promise<{ message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(
+      `/healthcare/companies/${companyId}/unassign-clinic/${clinicId}`
+    )
+    return response.data
+  },
 }
 
 export const healthcareService = {
@@ -197,6 +314,7 @@ export const healthcareService = {
       clinic_id?: number
       city?: string
       is_verified?: boolean
+      review_status?: string
     }
   ): Promise<HealthcarePaginatedResponse<Doctor>> => {
     const params = new URLSearchParams()
@@ -215,6 +333,9 @@ export const healthcareService = {
     }
     if (filters?.is_verified !== undefined) {
       params.append("is_verified", filters.is_verified.toString())
+    }
+    if (filters?.review_status) {
+      params.append("review_status", filters.review_status)
     }
     const response = await apiClient.get<HealthcarePaginatedResponse<Doctor>>(
       `/healthcare/doctors?${params.toString()}`
@@ -295,6 +416,64 @@ export const healthcareService = {
     const response = await apiClient.post<{ success: boolean; data: Doctor }>(
       `/healthcare/doctors/${doctorId}/assign-clinics`,
       { clinics }
+    )
+    return response.data.data
+  },
+
+  // Doctor-Clinic CRUD operations
+  getAllDoctorClinics: async (
+    page: number = 1,
+    filters?: {
+      doctor_id?: number
+      clinic_id?: number
+      active?: boolean
+    }
+  ): Promise<HealthcarePaginatedResponse<DoctorClinic>> => {
+    const params = new URLSearchParams()
+    params.append("page", page.toString())
+    if (filters?.doctor_id) params.append("doctor_id", filters.doctor_id.toString())
+    if (filters?.clinic_id) params.append("clinic_id", filters.clinic_id.toString())
+    if (filters?.active !== undefined) params.append("active", filters.active.toString())
+
+    const response = await apiClient.get<HealthcarePaginatedResponse<DoctorClinic>>(
+      `/healthcare/doctor-clinics?${params.toString()}`
+    )
+    return response.data
+  },
+
+  getDoctorClinicById: async (id: number): Promise<DoctorClinic> => {
+    const response = await apiClient.get<{ success: boolean; data: DoctorClinic }>(
+      `/healthcare/doctor-clinics/${id}`
+    )
+    return response.data.data
+  },
+
+  createDoctorClinic: async (data: CreateDoctorClinicRequest): Promise<DoctorClinic> => {
+    const response = await apiClient.post<{ success: boolean; data: DoctorClinic }>(
+      "/healthcare/doctor-clinics",
+      data
+    )
+    return response.data.data
+  },
+
+  updateDoctorClinic: async (id: number, data: UpdateDoctorClinicRequest): Promise<DoctorClinic> => {
+    const response = await apiClient.put<{ success: boolean; data: DoctorClinic }>(
+      `/healthcare/doctor-clinics/${id}`,
+      data
+    )
+    return response.data.data
+  },
+
+  deleteDoctorClinic: async (id: number): Promise<{ message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(
+      `/healthcare/doctor-clinics/${id}`
+    )
+    return response.data
+  },
+
+  toggleDoctorClinicStatus: async (id: number): Promise<DoctorClinic> => {
+    const response = await apiClient.patch<{ success: boolean; data: DoctorClinic }>(
+      `/healthcare/doctor-clinics/${id}/toggle-status`
     )
     return response.data.data
   },
@@ -568,6 +747,29 @@ export const healthcareService = {
     return response.data
   },
 
+  createDoctorClinicSchedule: async (data: any): Promise<any> => {
+    const response = await apiClient.post<{ success: boolean; data: any }>(
+      "/healthcare/doctor-clinic-schedules",
+      data
+    )
+    return response.data.data
+  },
+
+  updateDoctorClinicSchedule: async (id: number, data: any): Promise<any> => {
+    const response = await apiClient.put<{ success: boolean; data: any }>(
+      `/healthcare/doctor-clinic-schedules/${id}`,
+      data
+    )
+    return response.data.data
+  },
+
+  deleteDoctorClinicSchedule: async (id: number): Promise<{ message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(
+      `/healthcare/doctor-clinic-schedules/${id}`
+    )
+    return response.data
+  },
+
   // Appointments
   getAppointments: async (
     page: number = 1,
@@ -602,6 +804,17 @@ export const healthcareService = {
       `/healthcare/appointments/${id}`
     )
     return response.data.data
+  },
+
+  getAvailableSlots: async (
+    doctorId: number,
+    clinicId: number,
+    date: string
+  ): Promise<{ success: boolean; data: { time: string; available: boolean }[] }> => {
+    const response = await apiClient.get<{ success: boolean; data: { time: string; available: boolean }[] }>(
+      `/healthcare/doctors/${doctorId}/clinics/${clinicId}/available-slots?date=${date}`
+    )
+    return response.data
   },
 
   createAppointment: async (data: any): Promise<any> => {
@@ -902,7 +1115,7 @@ export const healthcareService = {
 
   updateDoctorPreferredMedicines: async (
     doctorId: number,
-    data: UpdateDoctorPreferredMedicinesRequest
+    data: DoctorPreferredMedicine[]
   ): Promise<Doctor> => {
     const response = await apiClient.post<{ success: boolean; data: Doctor }>(
       `/healthcare/doctors/${doctorId}/preferred-medicines`,
@@ -929,6 +1142,36 @@ export const healthcareService = {
       `/healthcare/doctors/${doctorId}/preferred-medicines/${medicineId}`
     )
     return response.data
+  },
+
+  // Doctor Review
+  getPendingReviewDoctors: async (
+    page: number = 1,
+    filters?: {
+      search?: string
+      specialty_id?: number
+    }
+  ): Promise<HealthcarePaginatedResponse<Doctor>> => {
+    const params = new URLSearchParams()
+    params.append("page", page.toString())
+    if (filters?.search && filters.search !== "") {
+      params.append("search", filters.search)
+    }
+    if (filters?.specialty_id) {
+      params.append("specialty_id", filters.specialty_id.toString())
+    }
+    const response = await apiClient.get<HealthcarePaginatedResponse<Doctor>>(
+      `/healthcare/doctors/pending-review?${params.toString()}`
+    )
+    return response.data
+  },
+
+  reviewDoctor: async (id: number, data: ReviewDoctorRequest): Promise<Doctor> => {
+    const response = await apiClient.post<{ success: boolean; data: Doctor }>(
+      `/healthcare/doctors/${id}/review`,
+      data
+    )
+    return response.data.data
   },
 }
 

@@ -36,9 +36,9 @@ export function VisitDetails() {
   const { data: prescriptionsData } = useVisitPrescriptions(Number(id));
   const { data: labTestsData } = useVisitLabTests(Number(id));
 
-  const visit = visitData?.data;
-  const prescriptions = prescriptionsData?.data || [];
-  const labTests = labTestsData?.data || [];
+  const visit = visitData;
+  const prescriptions = prescriptionsData || [];
+  const labTests = labTestsData || [];
 
   if (isLoading) {
     return (
@@ -95,7 +95,7 @@ export function VisitDetails() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Started At</p>
-                <p className="font-medium">{new Date(visit.started_at).toLocaleString()}</p>
+                <p className="font-medium">{visit.started_at ? new Date(visit.started_at).toLocaleString() : "Not started"}</p>
               </div>
               {visit.ended_at && (
                 <div>
@@ -188,21 +188,19 @@ export function VisitDetails() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Test Name</TableHead>
-                        <TableHead>Test Code</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Requested Date</TableHead>
+                        <TableHead>Created Date</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {labTests.map((labTest: LabTest) => (
                         <TableRow key={labTest.id}>
                           <TableCell>{labTest.test_name}</TableCell>
-                          <TableCell>{labTest.test_code}</TableCell>
                           <TableCell>
                             <Badge>{labTest.status}</Badge>
                           </TableCell>
                           <TableCell>
-                            {new Date(labTest.requested_date).toLocaleDateString()}
+                            {new Date(labTest.created_at).toLocaleDateString()}
                           </TableCell>
                         </TableRow>
                       ))}

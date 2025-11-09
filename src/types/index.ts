@@ -148,6 +148,30 @@ export interface LaravelPaginatedResponse<T> {
 }
 
 // Healthcare types
+export interface Company {
+  id: number
+  name: string
+  description: string | null
+  logo: string | null
+  email: string
+  phone: string | null
+  mobile: string | null
+  website: string | null
+  country: string | null
+  city: string | null
+  district: string | null
+  area: string | null
+  address: string | null
+  longitude: string | null
+  latitude: string | null
+  is_active: boolean
+  clinics_count?: number
+  active_clinics_count?: number
+  clinics?: Clinic[]
+  created_at: string
+  updated_at: string
+}
+
 export interface Specialty {
   id: number
   name: string
@@ -174,6 +198,8 @@ export interface Medicine {
 
 export interface Clinic {
   id: number
+  company_id: number | null
+  company?: Company
   name: string
   category: string | null
   photo: string | null
@@ -187,8 +213,6 @@ export interface Clinic {
   address: string | null
   longitude: string | null
   latitude: string | null
-  fees: string | null
-  consultation_fees: string | null
   verification_code: string | null
   created_at: string
   updated_at: string
@@ -211,6 +235,10 @@ export interface Doctor {
   qualifications: string[]
   experience_years: number | null
   gender: string | null
+  review_status: 'pending' | 'approved' | 'rejected'
+  reviewer?: User
+  reviewed_at?: string | null
+  review_notes?: string | null
   created_at: string
   updated_at: string
 }
@@ -262,6 +290,42 @@ export interface PatientProfile {
 }
 
 // Healthcare Request types
+export interface CreateCompanyRequest {
+  name: string
+  description?: string | null
+  logo?: File
+  email: string
+  phone?: string | null
+  mobile?: string | null
+  website?: string | null
+  country?: string | null
+  city?: string | null
+  district?: string | null
+  area?: string | null
+  address?: string | null
+  longitude?: string | null
+  latitude?: string | null
+  is_active?: boolean
+}
+
+export interface UpdateCompanyRequest {
+  name?: string
+  description?: string | null
+  logo?: File
+  email?: string
+  phone?: string | null
+  mobile?: string | null
+  website?: string | null
+  country?: string | null
+  city?: string | null
+  district?: string | null
+  area?: string | null
+  address?: string | null
+  longitude?: string | null
+  latitude?: string | null
+  is_active?: boolean
+}
+
 export interface CreateSpecialtyRequest {
   name: string
   description?: string | null
@@ -276,6 +340,7 @@ export interface CreateClinicRequest {
   name: string
   email: string
   category?: string | null
+  company_id?: number | null
   photo?: File
   mobile?: string | null
   phone?: string | null
@@ -286,14 +351,13 @@ export interface CreateClinicRequest {
   address?: string | null
   longitude?: string | null
   latitude?: string | null
-  fees?: string | null
-  consultation_fees?: string | null
 }
 
 export interface UpdateClinicRequest {
   name?: string
   email?: string
   category?: string | null
+  company_id?: number | null
   photo?: File
   mobile?: string | null
   phone?: string | null
@@ -304,17 +368,15 @@ export interface UpdateClinicRequest {
   address?: string | null
   longitude?: string | null
   latitude?: string | null
-  fees?: string | null
-  consultation_fees?: string | null
 }
 
 export interface CreateDoctorRequest {
-  user_id: number
-  name: string
-  email: string
+  user_name: string
+  user_email: string
+  user_phone?: string | null
+  user_password: string
   specialty_id: number
   photo?: File
-  mobile?: string | null
   license_number?: string | null
   license_card?: File
   title?: string | null
@@ -340,12 +402,17 @@ export interface UpdateDoctorRequest {
   gender?: string | null
 }
 
+export interface ReviewDoctorRequest {
+  action: 'approve' | 'reject'
+  review_notes?: string
+}
+
 export interface CreatePatientRequest {
-  user_id: number
   name: string
+  email: string
+  password: string
+  phone?: string | null
   photo?: File
-  mobile?: string | null
-  email?: string | null
   work_phone?: string | null
   home_phone?: string | null
   country?: string | null
@@ -417,8 +484,18 @@ export interface DoctorPreferredMedicine {
   notes?: string | null
 }
 
-export interface UpdateDoctorPreferredMedicinesRequest {
-  medicines: DoctorPreferredMedicine[]
+export interface CreateDoctorClinicRequest {
+  doctor_id: number
+  clinic_id: number
+  fees?: number | null
+  consultation_fees?: number | null
+  active?: boolean
+}
+
+export interface UpdateDoctorClinicRequest {
+  fees?: number | null
+  consultation_fees?: number | null
+  active?: boolean
 }
 
 // Healthcare Response types
@@ -436,23 +513,50 @@ export interface HealthcarePaginatedResponse<T> {
 // Doctor Schedule types
 export interface DoctorClinic {
   id: number
-  doctor_id: number
-  clinic_id: number
-  is_active: boolean
-  doctor?: Doctor
-  clinic?: Clinic
+  doctor?: {
+    id: number
+    name: string
+    specialty?: {
+      id: number
+      name: string
+    } | null
+  }
+  clinic?: {
+    id: number
+    name: string
+    category: string | null
+    address?: string | null
+    phone?: string | null
+    city?: string | null
+  }
+  fees: number | null
+  consultation_fees: number | null
+  active: boolean
+  full_name?: string
+  schedules_count?: number
   created_at: string
   updated_at: string
 }
 
 export interface DoctorSchedule {
   id: number
-  doctor_clinic_id: number
+  doctor_clinic: {
+    id: number
+    doctor?: {
+      id: number
+      name: string
+    }
+    clinic?: {
+      id: number
+      name: string
+    }
+  }
   day_of_week: string
+  day_name?: string
   start_time: string
   end_time: string
   slot_duration_minutes: number
-  doctor_clinic?: DoctorClinic
+  duration_minutes?: number
   created_at: string
   updated_at: string
 }
@@ -485,6 +589,8 @@ export interface Appointment {
   doctor_clinic_id: number
   type: string
   appointment_date: string
+  appointment_time: string
+  duration_minutes: number
   status: "booked" | "confirmed" | "arrived" | "in_progress" | "completed" | "cancelled" | "no_show"
   notes: string | null
   cancellation_reason: string | null
@@ -503,7 +609,10 @@ export interface CreateAppointmentRequest {
   doctor_clinic_id: number
   type: string
   appointment_date: string
+  appointment_time: string
+  duration_minutes: number
   notes?: string | null
+  status?: string
 }
 
 export interface UpdateAppointmentRequest {
@@ -616,15 +725,15 @@ export interface LabTest {
   patient_id: number
   doctor_id: number
   test_name: string
-  test_code: string
   result: string | null
   status: "pending" | "in_progress" | "completed" | "cancelled"
   result_file_path: string | null
-  requested_date: string
-  completed_date: string | null
   visit?: Visit
   patient?: Patient
   doctor?: Doctor
+  is_pending: boolean
+  is_completed: boolean
+  has_result: boolean
   created_at: string
   updated_at: string
 }
@@ -634,15 +743,12 @@ export interface CreateLabTestRequest {
   patient_id: number
   doctor_id: number
   test_name: string
-  test_code: string
-  requested_date: string
+  status: string
 }
 
 export interface UpdateLabTestRequest {
   test_name?: string
-  test_code?: string
   status?: string
-  result?: string | null
 }
 
 export interface UploadLabTestResultRequest {

@@ -141,7 +141,7 @@ export function CreatePrescription() {
                       <SelectValue placeholder="Select visit" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No Visit</SelectItem>
+                      <SelectItem value="none">No Visit</SelectItem>
                       {visits.map((visit: Visit) => (
                         <SelectItem key={visit.id} value={visit.id.toString()}>
                           Visit #{visit.id} -{" "}

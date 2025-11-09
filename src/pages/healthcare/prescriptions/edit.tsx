@@ -23,10 +23,8 @@ export function EditPrescription() {
     notes: "",
   });
 
-  const { data: prescriptionData, isLoading } = usePrescription(Number(id));
+  const { data: prescription, isLoading } = usePrescription(Number(id));
   const updatePrescription = useUpdatePrescription();
-
-  const prescription = prescriptionData?.data;
 
   useEffect(() => {
     if (prescription) {

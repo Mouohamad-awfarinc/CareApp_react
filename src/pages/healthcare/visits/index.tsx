@@ -223,7 +223,7 @@ export function Visits() {
                           {visit.clinic ? visit.clinic.name : "N/A"}
                         </TableCell>
                         <TableCell>
-                          {new Date(visit.started_at).toLocaleString()}
+                          {visit.started_at ? new Date(visit.started_at).toLocaleString() : "Not started"}
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(visit.status)}>

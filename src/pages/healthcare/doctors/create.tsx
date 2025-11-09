@@ -14,28 +14,24 @@ import {
 } from "@/components/ui/select"
 import { ArrowLeft, AlertCircle } from "lucide-react"
 import { useCreateDoctor, useSpecialties } from "@/hooks/use-healthcare"
-import { useUsers } from "@/hooks/use-users"
 import type { CreateDoctorRequest } from "@/types"
 
 export function CreateDoctor() {
   const navigate = useNavigate()
   const createDoctor = useCreateDoctor()
 
-  // Fetch specialties and users
+  // Fetch specialties
   const [specialtiesPage] = useState(1)
   const { data: specialtiesData } = useSpecialties(specialtiesPage)
-  const [usersPage] = useState(1)
-  const { data: usersData } = useUsers(usersPage, {})
 
   const specialties = specialtiesData?.data || []
-  const users = usersData?.data || []
 
   const [doctorForm, setDoctorForm] = useState({
-    user_id: "",
-    name: "",
-    email: "",
+    user_name: "",
+    user_email: "",
+    user_phone: "",
+    user_password: "",
     specialty_id: "",
-    mobile: "",
     license_number: "",
     title: "",
     occupation: "",
@@ -58,11 +54,11 @@ export function CreateDoctor() {
         .filter(Boolean)
 
       const requestData: CreateDoctorRequest = {
-        user_id: Number(doctorForm.user_id),
-        name: doctorForm.name,
-        email: doctorForm.email,
+        user_name: doctorForm.user_name,
+        user_email: doctorForm.user_email,
+        user_phone: doctorForm.user_phone || null,
+        user_password: doctorForm.user_password,
         specialty_id: Number(doctorForm.specialty_id),
-        mobile: doctorForm.mobile || null,
         license_number: doctorForm.license_number || null,
         title: doctorForm.title || null,
         occupation: doctorForm.occupation || null,
@@ -119,41 +115,44 @@ export function CreateDoctor() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="doctor-user">User *</Label>
-                  <Select
-                    value={doctorForm.user_id}
-                    onValueChange={(value) => setDoctorForm({ ...doctorForm, user_id: value })}
-                  >
-                    <SelectTrigger id="doctor-user">
-                      <SelectValue placeholder="Select a user" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id.toString()}>
-                          {user.name} ({user.email})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="doctor-name">Name *</Label>
+                  <Label htmlFor="user-name">User Name *</Label>
                   <Input
-                    id="doctor-name"
-                    value={doctorForm.name}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, name: e.target.value })}
+                    id="user-name"
+                    value={doctorForm.user_name}
+                    onChange={(e) => setDoctorForm({ ...doctorForm, user_name: e.target.value })}
                     placeholder="Dr. John Smith"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="doctor-email">Email</Label>
+                  <Label htmlFor="user-email">User Email *</Label>
                   <Input
-                    id="doctor-email"
+                    id="user-email"
                     type="email"
-                    value={doctorForm.email}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, email: e.target.value })}
-                    placeholder="doctor@hospital.com"
+                    value={doctorForm.user_email}
+                    onChange={(e) => setDoctorForm({ ...doctorForm, user_email: e.target.value })}
+                    placeholder="john.smith@clinic.com"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="user-phone">User Phone</Label>
+                  <Input
+                    id="user-phone"
+                    value={doctorForm.user_phone}
+                    onChange={(e) => setDoctorForm({ ...doctorForm, user_phone: e.target.value })}
+                    placeholder="+1234567890"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="user-password">User Password *</Label>
+                  <Input
+                    id="user-password"
+                    type="password"
+                    value={doctorForm.user_password}
+                    onChange={(e) => setDoctorForm({ ...doctorForm, user_password: e.target.value })}
+                    placeholder="Enter password"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -175,15 +174,6 @@ export function CreateDoctor() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="doctor-mobile">Mobile</Label>
-                  <Input
-                    id="doctor-mobile"
-                    value={doctorForm.mobile}
-                    onChange={(e) => setDoctorForm({ ...doctorForm, mobile: e.target.value })}
-                    placeholder="+1234567890"
-                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="doctor-license">License Number</Label>
@@ -266,12 +256,13 @@ export function CreateDoctor() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="doctor-license-card">License Card</Label>
+                  <Label htmlFor="doctor-license-card">License Card *</Label>
                   <Input
                     id="doctor-license-card"
                     type="file"
                     accept="image/*,.pdf"
                     onChange={(e) => setLicenseCardFile(e.target.files?.[0] || null)}
+                    required
                   />
                 </div>
               </div>

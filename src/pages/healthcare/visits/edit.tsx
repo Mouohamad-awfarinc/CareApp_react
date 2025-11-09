@@ -27,7 +27,7 @@ export function EditVisit() {
   const { data: visitData, isLoading } = useVisit(Number(id));
   const updateVisit = useUpdateVisit();
 
-  const visit = visitData?.data;
+  const visit = visitData;
 
   useEffect(() => {
     if (visit) {
@@ -105,7 +105,7 @@ export function EditVisit() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Started At</p>
-                <p className="font-medium">{new Date(visit.started_at).toLocaleString()}</p>
+                <p className="font-medium">{visit.started_at ? new Date(visit.started_at).toLocaleString() : "Not started"}</p>
               </div>
             </div>
           </CardContent>

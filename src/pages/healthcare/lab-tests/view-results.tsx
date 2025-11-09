@@ -30,7 +30,7 @@ export function ViewLabTestResults() {
 
   const { data: labTestData, isLoading } = useLabTest(Number(id));
 
-  const labTest = labTestData?.data;
+  const labTest = labTestData;
 
   if (isLoading) {
     return (
@@ -79,10 +79,6 @@ export function ViewLabTestResults() {
                 <p className="font-medium">{labTest.test_name}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Test Code</p>
-                <p className="font-medium">{labTest.test_code}</p>
-              </div>
-              <div>
                 <p className="text-sm text-muted-foreground">Patient</p>
                 <p className="font-medium">
                   {labTest.patient ? labTest.patient.name : "N/A"}
@@ -95,9 +91,9 @@ export function ViewLabTestResults() {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Requested Date</p>
+                <p className="text-sm text-muted-foreground">Created Date</p>
                 <p className="font-medium">
-                  {new Date(labTest.requested_date).toLocaleDateString()}
+                  {new Date(labTest.created_at).toLocaleDateString()}
                 </p>
               </div>
               <div>

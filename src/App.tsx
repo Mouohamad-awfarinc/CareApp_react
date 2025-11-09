@@ -19,7 +19,8 @@ import { Specialties } from "./pages/healthcare/specialties"
 import { CreateSpecialty } from "./pages/healthcare/specialties/create"
 import { EditSpecialty } from "./pages/healthcare/specialties/edit"
 import { Clinics, CreateClinic, EditClinic, ClinicDetails } from "./pages/healthcare/clinics"
-import { Doctors, CreateDoctor, EditDoctor, DoctorDetails, AssignClinics as AssignDoctorClinics, ManageSchedule } from "./pages/healthcare/doctors"
+import { Companies, CreateCompany, EditCompany, CompanyDetails, AssignClinic } from "./pages/healthcare/companies/exports"
+import { Doctors, CreateDoctor, EditDoctor, DoctorDetails, AssignClinics as AssignDoctorClinics, ManageSchedule, ReviewDoctors } from "./pages/healthcare/doctors"
 import { Patients, CreatePatient, EditPatient, PatientDetails, UploadDocument } from "./pages/healthcare/patients"
 import { Appointments, CreateAppointment, EditAppointment, CancelAppointment } from "./pages/healthcare/appointments"
 import { LabTests, CreateLabTest, EditLabTest, ViewLabTestResults, UploadLabTestResults } from "./pages/healthcare/lab-tests"
@@ -31,6 +32,7 @@ import { MedicineDetails } from "./pages/healthcare/medicines/details"
 import { EditMedicine } from "./pages/healthcare/medicines/edit"
 import { DoctorPreferredMedicines } from "./pages/healthcare/doctors/preferred-medicines"
 import { MyMedicines } from "./pages/healthcare/my-medicines"
+import { Toaster } from "./components/ui/toaster"
 
 function App() {
   return (
@@ -177,6 +179,46 @@ function App() {
             }
           />
           <Route
+            path="/healthcare/companies"
+            element={
+              <ProtectedRoute>
+                <Companies />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/companies/create"
+            element={
+              <ProtectedRoute>
+                <CreateCompany />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/companies/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditCompany />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/companies/:id/details"
+            element={
+              <ProtectedRoute>
+                <CompanyDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/companies/:id/assign-clinic"
+            element={
+              <ProtectedRoute>
+                <AssignClinic />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/healthcare/doctors"
             element={
               <ProtectedRoute>
@@ -221,6 +263,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ManageSchedule />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/doctors/review"
+            element={
+              <ProtectedRoute>
+                <ReviewDoctors />
               </ProtectedRoute>
             }
           />
@@ -460,6 +510,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </QueryProvider>
   )
 }

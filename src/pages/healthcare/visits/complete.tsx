@@ -12,7 +12,7 @@ export function CompleteVisit() {
   const { data: visitData, isLoading } = useVisit(Number(id));
   const completeVisit = useCompleteVisit();
 
-  const visit = visitData?.data;
+  const visit = visitData;
 
   const handleComplete = async () => {
     try {
@@ -100,7 +100,7 @@ export function CompleteVisit() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Started At</p>
-                <p className="font-medium">{new Date(visit.started_at).toLocaleString()}</p>
+                <p className="font-medium">{visit.started_at ? new Date(visit.started_at).toLocaleString() : "Not started"}</p>
               </div>
               {visit.diagnosis && (
                 <div className="md:col-span-2">

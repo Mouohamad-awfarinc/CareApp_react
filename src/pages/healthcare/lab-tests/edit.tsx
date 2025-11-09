@@ -23,20 +23,18 @@ export function EditLabTest() {
   const { id } = useParams<{ id: string }>();
   const [formData, setFormData] = useState({
     test_name: "",
-    test_code: "",
     status: "pending",
   });
 
   const { data: labTestData, isLoading } = useLabTest(Number(id));
   const updateLabTest = useUpdateLabTest();
 
-  const labTest = labTestData?.data;
+  const labTest = labTestData;
 
   useEffect(() => {
     if (labTest) {
       setFormData({
         test_name: labTest.test_name,
-        test_code: labTest.test_code,
         status: labTest.status,
       });
     }
@@ -49,7 +47,6 @@ export function EditLabTest() {
         id: Number(id),
         data: {
           test_name: formData.test_name,
-          test_code: formData.test_code,
           status: formData.status,
         },
       });
@@ -116,7 +113,7 @@ export function EditLabTest() {
               <div>
                 <p className="text-sm text-muted-foreground">Requested Date</p>
                 <p className="font-medium">
-                  {new Date(labTest.requested_date).toLocaleDateString()}
+                  {new Date(labTest.created_at).toLocaleDateString()}
                 </p>
               </div>
               {labTest.result_file_path && (
@@ -146,19 +143,6 @@ export function EditLabTest() {
                       setFormData({ ...formData, test_name: e.target.value })
                     }
                     placeholder="e.g., Complete Blood Count"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="test_code">Test Code *</Label>
-                  <Input
-                    id="test_code"
-                    value={formData.test_code}
-                    onChange={(e) =>
-                      setFormData({ ...formData, test_code: e.target.value })
-                    }
-                    placeholder="e.g., CBC"
                     required
                   />
                 </div>

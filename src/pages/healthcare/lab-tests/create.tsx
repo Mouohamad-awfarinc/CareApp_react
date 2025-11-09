@@ -28,8 +28,6 @@ export function CreateLabTest() {
     patient_id: "",
     doctor_id: "",
     test_name: "",
-    test_code: "",
-    requested_date: new Date().toISOString().split("T")[0],
     status: "pending",
   });
 
@@ -50,8 +48,6 @@ export function CreateLabTest() {
         patient_id: Number(formData.patient_id),
         doctor_id: Number(formData.doctor_id),
         test_name: formData.test_name,
-        test_code: formData.test_code,
-        requested_date: formData.requested_date,
         status: formData.status,
       });
       navigate("/healthcare/lab-tests");
@@ -143,7 +139,7 @@ export function CreateLabTest() {
                       <SelectValue placeholder="Select visit" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No Visit</SelectItem>
+                      <SelectItem value="none">No Visit</SelectItem>
                       {visits.map((visit: Visit) => (
                         <SelectItem key={visit.id} value={visit.id.toString()}>
                           Visit #{visit.id} -{" "}
@@ -163,35 +159,6 @@ export function CreateLabTest() {
                       setFormData({ ...formData, test_name: e.target.value })
                     }
                     placeholder="e.g., Complete Blood Count"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="test_code">Test Code *</Label>
-                  <Input
-                    id="test_code"
-                    value={formData.test_code}
-                    onChange={(e) =>
-                      setFormData({ ...formData, test_code: e.target.value })
-                    }
-                    placeholder="e.g., CBC"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="requested_date">Requested Date *</Label>
-                  <Input
-                    id="requested_date"
-                    type="date"
-                    value={formData.requested_date}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        requested_date: e.target.value,
-                      })
-                    }
                     required
                   />
                 </div>

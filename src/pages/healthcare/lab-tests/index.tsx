@@ -191,7 +191,6 @@ export function LabTests() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Test Name</TableHead>
-                      <TableHead>Test Code</TableHead>
                       <TableHead>Patient</TableHead>
                       <TableHead>Doctor</TableHead>
                       <TableHead>Requested Date</TableHead>
@@ -206,7 +205,6 @@ export function LabTests() {
                         <TableCell className="font-medium">
                           {labTest.test_name}
                         </TableCell>
-                        <TableCell>{labTest.test_code}</TableCell>
                         <TableCell>
                           {labTest.patient ? labTest.patient.name : "N/A"}
                         </TableCell>
@@ -214,7 +212,7 @@ export function LabTests() {
                           {labTest.doctor ? labTest.doctor.name : "N/A"}
                         </TableCell>
                         <TableCell>
-                          {new Date(labTest.requested_date).toLocaleDateString()}
+                          {new Date(labTest.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(labTest.status)}>

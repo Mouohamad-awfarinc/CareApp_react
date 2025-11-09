@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select"
 import { ArrowLeft, AlertCircle } from "lucide-react"
 import { useClinic, useUpdateClinic, useUpdateClinicPhoto } from "@/hooks/use-healthcare"
+import { CountryDropdown, RegionDropdown } from "react-country-region-selector"
 
 export function EditClinic() {
   const navigate = useNavigate()
@@ -37,8 +38,6 @@ export function EditClinic() {
     address: "",
     longitude: "",
     latitude: "",
-    fees: "",
-    consultation_fees: "",
   })
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [error, setError] = useState("")
@@ -59,8 +58,6 @@ export function EditClinic() {
         address: clinic.address || "",
         longitude: clinic.longitude || "",
         latitude: clinic.latitude || "",
-        fees: clinic.fees || "",
-        consultation_fees: clinic.consultation_fees || "",
       })
     }
   }, [clinic])
@@ -84,8 +81,6 @@ export function EditClinic() {
         address: clinicForm.address || null,
         longitude: clinicForm.longitude || null,
         latitude: clinicForm.latitude || null,
-        fees: clinicForm.fees || null,
-        consultation_fees: clinicForm.consultation_fees || null,
       }
       
       await updateClinic.mutateAsync({ id: clinicId, data: requestData })
@@ -219,21 +214,24 @@ export function EditClinic() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="clinic-country">Country</Label>
-                  <Input
-                    id="clinic-country"
-                    value={clinicForm.country}
-                    onChange={(e) => setClinicForm({ ...clinicForm, country: e.target.value })}
-                    placeholder="USA"
-                  />
+                  <div className="w-full">
+                    <CountryDropdown
+                      value={clinicForm.country}
+                      onChange={(val) => setClinicForm({ ...clinicForm, country: val })}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="clinic-city">City</Label>
-                  <Input
-                    id="clinic-city"
-                    value={clinicForm.city}
-                    onChange={(e) => setClinicForm({ ...clinicForm, city: e.target.value })}
-                    placeholder="New York"
-                  />
+                  <div className="w-full">
+                    <RegionDropdown
+                      country={clinicForm.country}
+                      value={clinicForm.city}
+                      onChange={(val) => setClinicForm({ ...clinicForm, city: val })}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="clinic-district">District</Label>
@@ -278,30 +276,6 @@ export function EditClinic() {
                     value={clinicForm.latitude}
                     onChange={(e) => setClinicForm({ ...clinicForm, latitude: e.target.value })}
                     placeholder="40.7128"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="clinic-fees">Fees</Label>
-                  <Input
-                    id="clinic-fees"
-                    type="number"
-                    value={clinicForm.fees}
-                    onChange={(e) => setClinicForm({ ...clinicForm, fees: e.target.value })}
-                    placeholder="50.00"
-                    step="0.01"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="clinic-consultation-fees">Consultation Fees</Label>
-                  <Input
-                    id="clinic-consultation-fees"
-                    type="number"
-                    value={clinicForm.consultation_fees}
-                    onChange={(e) =>
-                      setClinicForm({ ...clinicForm, consultation_fees: e.target.value })
-                    }
-                    placeholder="100.00"
-                    step="0.01"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">

@@ -120,6 +120,15 @@ export function AppLayout({ children }: AppLayoutProps) {
                     </NavLink>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
+                    <NavLink to="/healthcare/companies">
+                      {({ isActive }) => (
+                        <SidebarMenuSubButton asChild isActive={isActive}>
+                          <span>Companies</span>
+                        </SidebarMenuSubButton>
+                      )}
+                    </NavLink>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
                     <NavLink to="/healthcare/doctors">
                       {({ isActive }) => (
                         <SidebarMenuSubButton asChild isActive={isActive}>

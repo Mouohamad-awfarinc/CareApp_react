@@ -8,20 +8,18 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft } from "lucide-react"
 import { useCreatePatient } from "@/hooks/use-healthcare"
-import { useUsers } from "@/hooks/use-users"
+import { CountryDropdown, RegionDropdown } from "react-country-region-selector"
 
 export function CreatePatient() {
   const navigate = useNavigate()
   const createPatient = useCreatePatient()
-  const { data: usersData } = useUsers(1, {})
-
-  const users = usersData?.data || []
 
   const [formData, setFormData] = useState({
-    user_id: "",
     name: "",
-    mobile: "",
     email: "",
+    password: "",
+    phone: "",
+    mobile: "",
     work_phone: "",
     home_phone: "",
     country: "",
@@ -48,7 +46,7 @@ export function CreatePatient() {
     e.preventDefault()
     setError("")
 
-    if (!formData.name || !formData.gender) {
+    if (!formData.name || !formData.email || !formData.password || !formData.gender) {
       setError("Please fill in all required fields")
       return
     }
@@ -56,10 +54,11 @@ export function CreatePatient() {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const requestData: any = {
-        user_id: formData.user_id ? Number(formData.user_id) : undefined,
         name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone || null,
         mobile: formData.mobile || null,
-        email: formData.email || null,
         work_phone: formData.work_phone || null,
         home_phone: formData.home_phone || null,
         country: formData.country || null,
@@ -117,23 +116,6 @@ export function CreatePatient() {
                 </div>
               )}
 
-              {/* User Selection (Optional) */}
-              <div className="grid gap-2">
-                <Label htmlFor="user_id">User Account (Optional)</Label>
-                <Select value={formData.user_id} onValueChange={(value) => setFormData({ ...formData, user_id: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select user" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id.toString()}>
-                        {user.name} ({user.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Basic Info */}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
@@ -143,6 +125,37 @@ export function CreatePatient() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
                 </div>
 
@@ -157,25 +170,6 @@ export function CreatePatient() {
                       <SelectItem value="female">Female</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="mobile">Mobile</Label>
-                  <Input
-                    id="mobile"
-                    value={formData.mobile}
-                    onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                  />
                 </div>
 
                 <div className="grid gap-2">
@@ -238,20 +232,25 @@ export function CreatePatient() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
                   <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  />
+                  <div className="w-full">
+                    <CountryDropdown
+                      value={formData.country}
+                      onChange={(val) => setFormData({ ...formData, country: val })}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="city">City</Label>
-                  <Input
-                    id="city"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  />
+                  <div className="w-full">
+                    <RegionDropdown
+                      country={formData.country}
+                      value={formData.city}
+                      onChange={(val) => setFormData({ ...formData, city: val })}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-2">

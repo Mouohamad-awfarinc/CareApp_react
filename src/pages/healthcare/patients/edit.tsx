@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft } from "lucide-react"
 import { usePatient, useUpdatePatient, useUpdatePatientFile } from "@/hooks/use-healthcare"
 import { useUsers } from "@/hooks/use-users"
+import { CountryDropdown, RegionDropdown } from "react-country-region-selector"
 
 export function EditPatient() {
   const navigate = useNavigate()
@@ -302,20 +303,25 @@ export function EditPatient() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
                   <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  />
+                  <div className="w-full">
+                    <CountryDropdown
+                      value={formData.country}
+                      onChange={(val) => setFormData({ ...formData, country: val })}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="city">City</Label>
-                  <Input
-                    id="city"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  />
+                  <div className="w-full">
+                    <RegionDropdown
+                      country={formData.country}
+                      value={formData.city}
+                      onChange={(val) => setFormData({ ...formData, city: val })}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-2">

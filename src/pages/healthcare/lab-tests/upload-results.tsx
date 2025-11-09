@@ -16,7 +16,7 @@ export function UploadLabTestResults() {
   const { data: labTestData, isLoading } = useLabTest(Number(id));
   const uploadLabTestResult = useUploadLabTestResult();
 
-  const labTest = labTestData?.data;
+  const labTest = labTestData;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,10 +79,6 @@ export function UploadLabTestResults() {
               <div>
                 <p className="text-sm text-muted-foreground">Test Name</p>
                 <p className="font-medium">{labTest.test_name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Test Code</p>
-                <p className="font-medium">{labTest.test_code}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Patient</p>
