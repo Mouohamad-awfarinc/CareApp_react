@@ -128,14 +128,6 @@ export function ClinicDetails() {
                 <p className="text-sm font-medium text-muted-foreground">Address</p>
                 <p className="text-sm">{clinic.address || "—"}</p>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Fees</p>
-                <p className="text-sm">{clinic.fees ? `$${clinic.fees}` : "—"}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Consultation Fees</p>
-                <p className="text-sm">{clinic.consultation_fees ? `$${clinic.consultation_fees}` : "—"}</p>
-              </div>
             </div>
           </CardContent>
         </Card>
