@@ -166,7 +166,7 @@ export function ReviewDoctors() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {doctors.map((doctor) => (
+                    {doctors.map((doctor: Doctor) => (
                       <TableRow key={doctor.id}>
                         <TableCell>
                           <Avatar className="h-10 w-10">

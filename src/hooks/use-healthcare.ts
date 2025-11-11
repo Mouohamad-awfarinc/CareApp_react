@@ -8,6 +8,7 @@ import type {
   UpdateClinicRequest,
   CreateDoctorRequest,
   UpdateDoctorRequest,
+  ReviewDoctorRequest,
   CreatePatientRequest,
   UpdatePatientRequest,
   CreateMedicineRequest,
@@ -228,6 +229,33 @@ export function useDeleteDoctor() {
     mutationFn: (id: number) => healthcareService.deleteDoctor(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctors"] })
+    },
+  })
+}
+
+// Doctor Review hooks
+export function usePendingReviewDoctors(
+  page: number = 1,
+  filters?: {
+    search?: string
+    specialty_id?: number
+  }
+) {
+  return useQuery({
+    queryKey: ["pending-review-doctors", page, filters],
+    queryFn: () => healthcareService.getPendingReviewDoctors(page, filters),
+  })
+}
+
+export function useReviewDoctor() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ReviewDoctorRequest }) =>
+      healthcareService.reviewDoctor(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doctors"] })
+      queryClient.invalidateQueries({ queryKey: ["pending-review-doctors"] })
     },
   })
 }
