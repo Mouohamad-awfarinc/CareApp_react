@@ -3,63 +3,38 @@ import { useNavigate } from "react-router-dom"
 import { AppLayout } from "@/components/layout/app-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Edit, XCircle, Filter } from "lucide-react"
-import { useAppointments, useClinics, useDoctors, usePatients } from "@/hooks/use-healthcare"
+import { Plus, Edit, XCircle, Filter, UserPlus } from "lucide-react"
+import { useAppointments, useUpdateAppointmentStatus } from "@/hooks/use-healthcare"
+import { useDebounce } from "@/hooks/use-debounce"
 import type { Appointment } from "@/types"
 import { Badge } from "@/components/ui/badge"
-import { SearchInput } from "@/components/data-table/search-input"
 import { Pagination } from "@/components/data-table/pagination"
-
-const getStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    booked: "bg-blue-500",
-    confirmed: "bg-green-500",
-    arrived: "bg-purple-500",
-    in_progress: "bg-yellow-500",
-    completed: "bg-gray-500",
-    cancelled: "bg-red-500",
-    no_show: "bg-orange-500",
-  }
-  return colors[status] || "bg-gray-500"
-}
+import { SearchInput } from "@/components/data-table/search-input"
 
 export function Appointments() {
   const navigate = useNavigate()
 
-  const [searchQuery, setSearchQuery] = useState("")
-  
   // Filters
-  const [clinicFilter, setClinicFilter] = useState<string>("all")
-  const [doctorFilter, setDoctorFilter] = useState<string>("all")
-  const [patientFilter, setPatientFilter] = useState<string>("all")
   const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [dateFromFilter, setDateFromFilter] = useState<string>("")
-  const [dateToFilter, setDateToFilter] = useState<string>("")
+  const [searchFilter, setSearchFilter] = useState<string>("")
+
+  // Debounce search to avoid too many API calls
+  const debouncedSearch = useDebounce(searchFilter, 500)
 
   // Pagination
   const [page, setPage] = useState(1)
 
-  // Fetch data
+  // Fetch data (only status filter is sent)
   const { data: appointmentsData, isLoading } = useAppointments(page, {
-    clinic_id: clinicFilter !== "all" ? Number(clinicFilter) : undefined,
-    doctor_id: doctorFilter !== "all" ? Number(doctorFilter) : undefined,
-    patient_id: patientFilter !== "all" ? Number(patientFilter) : undefined,
     status: statusFilter !== "all" ? statusFilter : undefined,
-    date_from: dateFromFilter || undefined,
-    date_to: dateToFilter || undefined,
+    search: debouncedSearch || undefined,
   })
 
-  const { data: clinicsData } = useClinics(1, {})
-  const { data: doctorsData } = useDoctors(1, {})
-  const { data: patientsData } = usePatients(1, {})
-
   const appointments = appointmentsData?.data || []
-  const clinics = clinicsData?.data || []
-  const doctors = doctorsData?.data || []
-  const patients = patientsData?.data || []
+
+  const updateAppointmentStatus = useUpdateAppointmentStatus()
 
   return (
     <AppLayout>
@@ -70,10 +45,20 @@ export function Appointments() {
             <h1 className="text-3xl font-bold tracking-tight">Appointments</h1>
             <p className="text-muted-foreground">Manage patient appointments</p>
           </div>
-          <Button onClick={() => navigate("/healthcare/appointments/create")} className="shadow-lg hover:shadow-secondary/20">
-            <Plus className="mr-2 h-4 w-4" />
-            New Appointment
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/healthcare/patients/create")}
+              className="shadow-lg hover:shadow-secondary/20"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add Patient
+            </Button>
+            <Button onClick={() => navigate("/healthcare/appointments/create")} className="shadow-lg hover:shadow-secondary/20">
+              <Plus className="mr-2 h-4 w-4" />
+              New Appointment
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -88,51 +73,11 @@ export function Appointments() {
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
               <SearchInput
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search appointments..."
+                placeholder="Search by patient name, email, mobile, or notes..."
+                value={searchFilter}
+                onChange={setSearchFilter}
               />
-              <Select value={clinicFilter} onValueChange={setClinicFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by clinic" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Clinics</SelectItem>
-                  {clinics.map((clinic) => (
-                    <SelectItem key={clinic.id} value={clinic.id.toString()}>
-                      {clinic.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={doctorFilter} onValueChange={setDoctorFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by doctor" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Doctors</SelectItem>
-                  {doctors.map((doctor) => (
-                    <SelectItem key={doctor.id} value={doctor.id.toString()}>
-                      {doctor.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-4 md:grid-cols-3">
-              <Select value={patientFilter} onValueChange={setPatientFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by patient" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Patients</SelectItem>
-                  {patients.map((patient) => (
-                    <SelectItem key={patient.id} value={patient.id.toString()}>
-                      {patient.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div />
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by status" />
@@ -148,30 +93,6 @@ export function Appointments() {
                   <SelectItem value="no_show">No Show</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <label htmlFor="date_from" className="text-sm font-medium">
-                  Date From
-                </label>
-                <Input
-                  id="date_from"
-                  type="date"
-                  value={dateFromFilter}
-                  onChange={(e) => setDateFromFilter(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <label htmlFor="date_to" className="text-sm font-medium">
-                  Date To
-                </label>
-                <Input
-                  id="date_to"
-                  type="date"
-                  value={dateToFilter}
-                  onChange={(e) => setDateToFilter(e.target.value)}
-                />
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -229,9 +150,29 @@ export function Appointments() {
                           <Badge variant="secondary">{appointment.type}</Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(appointment.status)}>
-                            {appointment.status}
-                          </Badge>
+                          <Select
+                            value={appointment.status}
+                            onValueChange={(value) => {
+                              updateAppointmentStatus.mutate({
+                                id: appointment.id,
+                                status: value,
+                              })
+                            }}
+                            disabled={updateAppointmentStatus.isPending}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="booked">Booked</SelectItem>
+                              <SelectItem value="confirmed">Confirmed</SelectItem>
+                              <SelectItem value="arrived">Arrived</SelectItem>
+                              <SelectItem value="in_progress">In Progress</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                              <SelectItem value="no_show">No Show</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">

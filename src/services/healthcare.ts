@@ -215,6 +215,7 @@ export const healthcareService = {
       city?: string
       category?: string
       is_active?: boolean
+      per_page?: number
     }
   ): Promise<HealthcarePaginatedResponse<Clinic>> => {
     const params = new URLSearchParams()
@@ -230,6 +231,9 @@ export const healthcareService = {
     }
     if (filters?.is_active !== undefined) {
       params.append("is_active", filters.is_active.toString())
+    }
+    if (filters?.per_page) {
+      params.append("per_page", filters.per_page.toString())
     }
     const response = await apiClient.get<HealthcarePaginatedResponse<Clinic>>(
       `/healthcare/clinics?${params.toString()}`
@@ -315,6 +319,7 @@ export const healthcareService = {
       city?: string
       is_verified?: boolean
       review_status?: string
+      per_page?: number
     }
   ): Promise<HealthcarePaginatedResponse<Doctor>> => {
     const params = new URLSearchParams()
@@ -336,6 +341,9 @@ export const healthcareService = {
     }
     if (filters?.review_status) {
       params.append("review_status", filters.review_status)
+    }
+    if (filters?.per_page) {
+      params.append("per_page", filters.per_page.toString())
     }
     const response = await apiClient.get<HealthcarePaginatedResponse<Doctor>>(
       `/healthcare/doctors?${params.toString()}`
@@ -486,6 +494,7 @@ export const healthcareService = {
       gender?: string
       clinic_id?: number
       doctor_id?: number
+      per_page?: number
     }
   ): Promise<HealthcarePaginatedResponse<Patient>> => {
     const params = new URLSearchParams()
@@ -501,6 +510,9 @@ export const healthcareService = {
     }
     if (filters?.doctor_id) {
       params.append("doctor_id", filters.doctor_id.toString())
+    }
+    if (filters?.per_page) {
+      params.append("per_page", filters.per_page.toString())
     }
     const response = await apiClient.get<HealthcarePaginatedResponse<Patient>>(
       `/healthcare/patients?${params.toString()}`
@@ -601,15 +613,11 @@ export const healthcareService = {
     patientId: number,
     filters?: {
       status?: string
-      date_from?: string
-      date_to?: string
       per_page?: number
     }
   ): Promise<any> => {
     const params = new URLSearchParams()
     if (filters?.status) params.append("status", filters.status)
-    if (filters?.date_from) params.append("date_from", filters.date_from)
-    if (filters?.date_to) params.append("date_to", filters.date_to)
     if (filters?.per_page) params.append("per_page", filters.per_page.toString())
     
     const response = await apiClient.get(
@@ -623,15 +631,11 @@ export const healthcareService = {
     patientId: number,
     filters?: {
       status?: string
-      date_from?: string
-      date_to?: string
       per_page?: number
     }
   ): Promise<any> => {
     const params = new URLSearchParams()
     if (filters?.status) params.append("status", filters.status)
-    if (filters?.date_from) params.append("date_from", filters.date_from)
-    if (filters?.date_to) params.append("date_to", filters.date_to)
     if (filters?.per_page) params.append("per_page", filters.per_page.toString())
     
     const response = await apiClient.get(
@@ -645,15 +649,11 @@ export const healthcareService = {
     patientId: number,
     filters?: {
       status?: string
-      date_from?: string
-      date_to?: string
       per_page?: number
     }
   ): Promise<any> => {
     const params = new URLSearchParams()
     if (filters?.status) params.append("status", filters.status)
-    if (filters?.date_from) params.append("date_from", filters.date_from)
-    if (filters?.date_to) params.append("date_to", filters.date_to)
     if (filters?.per_page) params.append("per_page", filters.per_page.toString())
     
     const response = await apiClient.get(
@@ -778,8 +778,7 @@ export const healthcareService = {
       doctor_id?: number
       patient_id?: number
       status?: string
-      date_from?: string
-      date_to?: string
+      search?: string
       per_page?: number
     }
   ): Promise<any> => {
@@ -789,8 +788,7 @@ export const healthcareService = {
     if (filters?.doctor_id) params.append("doctor_id", filters.doctor_id.toString())
     if (filters?.patient_id) params.append("patient_id", filters.patient_id.toString())
     if (filters?.status) params.append("status", filters.status)
-    if (filters?.date_from) params.append("date_from", filters.date_from)
-    if (filters?.date_to) params.append("date_to", filters.date_to)
+    if (filters?.search && filters.search !== "") params.append("search", filters.search)
     if (filters?.per_page) params.append("per_page", filters.per_page.toString())
     
     const response = await apiClient.get(
@@ -833,6 +831,14 @@ export const healthcareService = {
     return response.data.data
   },
 
+  updateAppointmentStatus: async (id: number, status: string): Promise<any> => {
+    const response = await apiClient.patch<{ success: boolean; data: any }>(
+      `/healthcare/appointments/${id}/status`,
+      { status }
+    )
+    return response.data.data
+  },
+
   cancelAppointment: async (id: number, reason?: string): Promise<any> => {
     const response = await apiClient.patch<{ success: boolean; data: any }>(
       `/healthcare/appointments/${id}/cancel`,
@@ -849,8 +855,6 @@ export const healthcareService = {
       doctor_id?: number
       clinic_id?: number
       status?: string
-      date_from?: string
-      date_to?: string
       per_page?: number
     }
   ): Promise<any> => {
@@ -860,8 +864,6 @@ export const healthcareService = {
     if (filters?.doctor_id) params.append("doctor_id", filters.doctor_id.toString())
     if (filters?.clinic_id) params.append("clinic_id", filters.clinic_id.toString())
     if (filters?.status) params.append("status", filters.status)
-    if (filters?.date_from) params.append("date_from", filters.date_from)
-    if (filters?.date_to) params.append("date_to", filters.date_to)
     if (filters?.per_page) params.append("per_page", filters.per_page.toString())
     
     const response = await apiClient.get(

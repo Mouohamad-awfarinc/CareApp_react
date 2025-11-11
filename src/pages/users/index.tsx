@@ -89,10 +89,20 @@ export function Users() {
               Manage your users and their permissions across the platform
             </p>
           </div>
-          <Button onClick={() => navigate('/users/create')} className="shadow-lg hover:shadow-secondary/20">
-            <Plus className="mr-2 h-4 w-4" />
-            Add User
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/users/create-receptionist')} 
+              className="shadow-lg hover:shadow-secondary/20"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Receptionist
+            </Button>
+            <Button onClick={() => navigate('/users/create')} className="shadow-lg hover:shadow-secondary/20">
+              <Plus className="mr-2 h-4 w-4" />
+              Add User
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -159,6 +169,7 @@ export function Users() {
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Role</TableHead>
+                      <TableHead>Clinics</TableHead>
                       <TableHead>Permissions</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -174,6 +185,19 @@ export function Users() {
                             <Badge variant="secondary">{user.role.name}</Badge>
                           ) : (
                             <span className="text-muted-foreground">No role</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {user.clinics && user.clinics.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {user.clinics.map((clinic) => (
+                                <Badge key={clinic.id} variant="outline" className="text-xs">
+                                  {clinic.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">No clinics assigned</span>
                           )}
                         </TableCell>
                         <TableCell>

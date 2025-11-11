@@ -8,19 +8,14 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeft, Clock } from "lucide-react"
-import { useCreateAppointment, useDoctors, usePatients, useAvailableSlots, useDoctorClinics } from "@/hooks/use-healthcare"
+import { useCreateAppointment, useAvailableSlots } from "@/hooks/use-healthcare"
+import { useSearchablePatients, useSearchableClinics, useSearchableDoctors } from "@/hooks/use-healthcare"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 
 export function CreateAppointment() {
   const navigate = useNavigate()
   const createAppointment = useCreateAppointment()
 
-  const { data: doctorsData } = useDoctors(1, {})
-  const { data: patientsData } = usePatients(1, {})
-
-  const doctors = doctorsData?.data || []
-  const patients = patientsData?.data || []
-
-  const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
     patient_id: "",
     doctor_id: "",
@@ -34,6 +29,18 @@ export function CreateAppointment() {
     status: "booked",
   })
   const [error, setError] = useState("")
+  const [patientSearch, setPatientSearch] = useState("")
+  const [clinicSearch, setClinicSearch] = useState("")
+  const [doctorSearch, setDoctorSearch] = useState("")
+
+  // Search hooks
+  const { data: patientsData } = useSearchablePatients(patientSearch)
+  const { data: clinicsData } = useSearchableClinics(clinicSearch)
+  const { data: doctorsData } = useSearchableDoctors(doctorSearch, formData.clinic_id ? Number(formData.clinic_id) : undefined)
+
+  const patients = patientsData?.data || []
+  const clinics = clinicsData?.data || []
+  const doctors = doctorsData?.data || []
 
   // Get available slots when doctor, clinic, and date are selected
   const { data: availableSlotsData } = useAvailableSlots(
@@ -43,12 +50,6 @@ export function CreateAppointment() {
   )
 
   const availableSlots = availableSlotsData?.data || []
-
-  // Get clinics for selected doctor
-  const { data: doctorClinicsData } = useDoctorClinics(
-    formData.doctor_id ? Number(formData.doctor_id) : 0
-  )
-  const doctorClinics = doctorClinicsData || []
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -60,29 +61,6 @@ export function CreateAppointment() {
       // Reset appointment_time when date changes
       ...(name === 'appointment_date' ? { appointment_time: "" } : {}),
     }))
-  }
-
-  const nextStep = () => {
-    if (currentStep < 4) setCurrentStep(currentStep + 1)
-  }
-
-  const prevStep = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1)
-  }
-
-  const canProceedToNext = () => {
-    switch (currentStep) {
-      case 1:
-        return !!formData.patient_id
-      case 2:
-        return !!formData.doctor_id
-      case 3:
-        return !!formData.clinic_id
-      case 4:
-        return !!formData.appointment_date && !!formData.appointment_time
-      default:
-        return false
-    }
   }
 
   const handleSlotSelect = (slot: string) => {
@@ -140,7 +118,7 @@ export function CreateAppointment() {
           <Card>
             <CardHeader>
               <CardTitle>Appointment Details</CardTitle>
-              <CardDescription>Step {currentStep} of 4</CardDescription>
+              <CardDescription>Fill in the appointment information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {error && (
@@ -149,255 +127,194 @@ export function CreateAppointment() {
                 </div>
               )}
 
-              {/* Step 1: Select Patient */}
-              {currentStep === 1 && (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold">Select Patient</h3>
-                    <p className="text-muted-foreground">Choose the patient for this appointment</p>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="patient_id">Patient *</Label>
-                    <Select
-                      value={formData.patient_id}
-                      onValueChange={(value) => setFormData({ ...formData, patient_id: value })}
-                      required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select patient" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {patients.map((patient) => (
-                          <SelectItem key={patient.id} value={patient.id.toString()}>
-                            {patient.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Patient Search */}
+                <div className="grid gap-2">
+                  <Label htmlFor="patient_id">Patient *</Label>
+                  <SearchableSelect
+                    placeholder="Search for patient..."
+                    value={formData.patient_id}
+                    onSelect={(value) => setFormData({ ...formData, patient_id: value })}
+                    fetchData={async (search) => {
+                      setPatientSearch(search)
+                      // Wait a bit for the query to update
+                      await new Promise(resolve => setTimeout(resolve, 100))
+                      return patients.map(p => ({ id: p.id, name: p.name }))
+                    }}
+                    className="w-full"
+                  />
                 </div>
-              )}
 
-              {/* Step 2: Select Doctor */}
-              {currentStep === 2 && (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold">Select Doctor</h3>
-                    <p className="text-muted-foreground">Choose the doctor for this appointment</p>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="doctor_id">Doctor *</Label>
-                    <Select
-                      value={formData.doctor_id}
-                      onValueChange={(value) => {
-                        setFormData({ ...formData, doctor_id: value, clinic_id: "", appointment_time: "" })
-                      }}
-                      required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select doctor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {doctors.map((doctor) => (
-                          <SelectItem key={doctor.id} value={doctor.id.toString()}>
-                            {doctor.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                {/* Clinic Search */}
+                <div className="grid gap-2">
+                  <Label htmlFor="clinic_id">Clinic *</Label>
+                  <SearchableSelect
+                    placeholder="Search for clinic..."
+                    value={formData.clinic_id}
+                    onSelect={(value) => {
+                      setFormData({ ...formData, clinic_id: value, doctor_id: "", appointment_time: "" })
+                      setDoctorSearch("") // Reset doctor search when clinic changes
+                    }}
+                    fetchData={async (search) => {
+                      setClinicSearch(search)
+                      // Wait a bit for the query to update
+                      await new Promise(resolve => setTimeout(resolve, 100))
+                      return clinics.map(c => ({ id: c.id, name: c.name }))
+                    }}
+                    className="w-full"
+                  />
                 </div>
-              )}
 
-              {/* Step 3: Select Clinic */}
-              {currentStep === 3 && (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold">Select Clinic</h3>
-                    <p className="text-muted-foreground">Choose a clinic where the doctor is available</p>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="clinic_id">Clinic *</Label>
-                    <Select
-                      value={formData.clinic_id}
-                      onValueChange={(value) => {
-                        setFormData({ ...formData, clinic_id: value, appointment_time: "" })
-                      }}
-                      required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select clinic" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {doctorClinics.map((clinic) => (
-                          <SelectItem key={clinic.id} value={clinic.id.toString()}>
-                            {clinic.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                {/* Doctor Search */}
+                <div className="grid gap-2">
+                  <Label htmlFor="doctor_id">Doctor *</Label>
+                  <SearchableSelect
+                    placeholder="Search for doctor..."
+                    value={formData.doctor_id}
+                    onSelect={(value) => {
+                      setFormData({ ...formData, doctor_id: value, appointment_time: "" })
+                    }}
+                    fetchData={async (search) => {
+                      setDoctorSearch(search)
+                      // Wait a bit for the query to update
+                      await new Promise(resolve => setTimeout(resolve, 100))
+                      return doctors.map(d => ({ id: d.id, name: d.name }))
+                    }}
+                    className="w-full"
+                  />
                 </div>
-              )}
 
-              {/* Step 4: Select Date and Time */}
-              {currentStep === 4 && (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold">Select Date & Time</h3>
-                    <p className="text-muted-foreground">Choose available date and time slot</p>
-                  </div>
+                {/* Appointment Date */}
+                <div className="grid gap-2">
+                  <Label htmlFor="appointment_date">Appointment Date *</Label>
+                  <Input
+                    id="appointment_date"
+                    name="appointment_date"
+                    type="date"
+                    value={formData.appointment_date}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
 
-                  {/* Appointment Date */}
-                  <div className="grid gap-2">
-                    <Label htmlFor="appointment_date">Appointment Date *</Label>
-                    <Input
-                      id="appointment_date"
-                      name="appointment_date"
-                      type="date"
-                      value={formData.appointment_date}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-
-                  {/* Appointment Time Slots */}
-                  <div className="grid gap-2">
-                    <Label>Available Time Slots *</Label>
-                    {formData.doctor_id && formData.clinic_id && formData.appointment_date ? (
-                      availableSlots.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-2">
-                          {availableSlots.map((slot) => (
-                            <Button
-                              key={slot.time}
-                              type="button"
-                              variant={formData.appointment_time === slot.time ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => handleSlotSelect(slot.time)}
-                              className="flex items-center gap-1"
-                            >
-                              <Clock className="h-3 w-3" />
-                              {slot.time}
-                            </Button>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="p-3 bg-muted rounded-md text-sm text-muted-foreground">
-                          No available slots for this date
-                        </div>
-                      )
+                {/* Appointment Time Slots */}
+                <div className="grid gap-2 md:col-span-2">
+                  <Label>Available Time Slots *</Label>
+                  {formData.doctor_id && formData.clinic_id && formData.appointment_date ? (
+                    availableSlots.length > 0 ? (
+                      <div className="grid grid-cols-3 gap-2">
+                        {availableSlots.map((slot) => (
+                          <Button
+                            key={slot.time}
+                            type="button"
+                            variant={formData.appointment_time === slot.time ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleSlotSelect(slot.time)}
+                            className="flex items-center gap-1"
+                          >
+                            <Clock className="h-3 w-3" />
+                            {slot.time}
+                          </Button>
+                        ))}
+                      </div>
                     ) : (
                       <div className="p-3 bg-muted rounded-md text-sm text-muted-foreground">
-                        Select date to see available slots
+                        No available slots for this date
                       </div>
-                    )}
-                  </div>
-
-                  {/* Additional Fields */}
-                  <div className="grid gap-4 md:grid-cols-3">
-                    {/* Type */}
-                    <div className="grid gap-2">
-                      <Label htmlFor="type">Type *</Label>
-                      <Select
-                        value={formData.type}
-                        onValueChange={(value) => setFormData({ ...formData, type: value })}
-                        required
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="in_clinic">In Clinic</SelectItem>
-                          <SelectItem value="home_visit">Home Visit</SelectItem>
-                          <SelectItem value="telemedicine">Telemedicine</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    )
+                  ) : (
+                    <div className="p-3 bg-muted rounded-md text-sm text-muted-foreground">
+                      Select doctor, clinic, and date to see available slots
                     </div>
-
-                    {/* Duration */}
-                    <div className="grid gap-2">
-                      <Label htmlFor="duration_minutes">Duration (minutes) *</Label>
-                      <Select
-                        value={formData.duration_minutes.toString()}
-                        onValueChange={(value) => setFormData({ ...formData, duration_minutes: parseInt(value) })}
-                        required
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select duration" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="15">15 minutes</SelectItem>
-                          <SelectItem value="30">30 minutes</SelectItem>
-                          <SelectItem value="45">45 minutes</SelectItem>
-                          <SelectItem value="60">1 hour</SelectItem>
-                          <SelectItem value="90">1.5 hours</SelectItem>
-                          <SelectItem value="120">2 hours</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Status */}
-                    <div className="grid gap-2">
-                      <Label htmlFor="status">Status</Label>
-                      <Select
-                        value={formData.status}
-                        onValueChange={(value) => setFormData({ ...formData, status: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="booked">Booked</SelectItem>
-                          <SelectItem value="confirmed">Confirmed</SelectItem>
-                          <SelectItem value="arrived">Arrived</SelectItem>
-                          <SelectItem value="in_progress">In Progress</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                          <SelectItem value="no_show">No Show</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Notes */}
-                  <div className="grid gap-2">
-                    <Label htmlFor="notes">Notes</Label>
-                    <Textarea
-                      id="notes"
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      rows={4}
-                      placeholder="Enter any additional notes..."
-                    />
-                  </div>
+                  )}
                 </div>
-              )}
+
+                {/* Type */}
+                <div className="grid gap-2">
+                  <Label htmlFor="type">Appointment Type *</Label>
+                  <Select
+                    value={formData.type}
+                    onValueChange={(value) => setFormData({ ...formData, type: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="in_clinic">In Clinic</SelectItem>
+                      <SelectItem value="home_visit">Home Visit</SelectItem>
+                      <SelectItem value="telemedicine">Telemedicine</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Duration */}
+                <div className="grid gap-2">
+                  <Label htmlFor="duration_minutes">Duration (minutes) *</Label>
+                  <Select
+                    value={formData.duration_minutes.toString()}
+                    onValueChange={(value) => setFormData({ ...formData, duration_minutes: parseInt(value) })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15">15 minutes</SelectItem>
+                      <SelectItem value="30">30 minutes</SelectItem>
+                      <SelectItem value="45">45 minutes</SelectItem>
+                      <SelectItem value="60">1 hour</SelectItem>
+                      <SelectItem value="90">1.5 hours</SelectItem>
+                      <SelectItem value="120">2 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Status */}
+                <div className="grid gap-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) => setFormData({ ...formData, status: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="booked">Booked</SelectItem>
+                      <SelectItem value="confirmed">Confirmed</SelectItem>
+                      <SelectItem value="arrived">Arrived</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                      <SelectItem value="no_show">No Show</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div className="grid gap-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  rows={4}
+                  placeholder="Enter any additional notes..."
+                />
+              </div>
             </CardContent>
           </Card>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={currentStep === 1 ? () => navigate("/healthcare/appointments") : prevStep}
-            >
-              {currentStep === 1 ? "Cancel" : "Previous"}
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-4 mt-6">
+            <Button type="button" variant="outline" onClick={() => navigate("/healthcare/appointments")}>
+              Cancel
             </Button>
-
-            {currentStep < 4 ? (
-              <Button
-                type="button"
-                onClick={nextStep}
-                disabled={!canProceedToNext()}
-              >
-                Next
-              </Button>
-            ) : (
-              <Button type="submit" disabled={createAppointment.isPending}>
-                {createAppointment.isPending ? "Creating..." : "Create Appointment"}
-              </Button>
-            )}
+            <Button type="submit" disabled={createAppointment.isPending}>
+              {createAppointment.isPending ? "Creating..." : "Create Appointment"}
+            </Button>
           </div>
         </form>
       </div>

@@ -47,6 +47,14 @@ export interface User {
   status: string | null
   role: Role | null
   permissions: Permission[]
+  clinics?: Array<{
+    id: number
+    name: string
+    pivot: {
+      role: string
+      active: boolean
+    }
+  }>
   created_at: string
   updated_at: string
 }
@@ -82,6 +90,7 @@ export interface CreateUserRequest {
   phone?: string
   status: "active" | "inactive"
   role_id?: number
+  clinic_ids?: number[]
 }
 
 export interface UpdateUserRequest {

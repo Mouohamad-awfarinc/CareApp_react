@@ -15,7 +15,6 @@ import type {
   CreateCompanyRequest,
   UpdateCompanyRequest,
   DoctorPreferredMedicine,
-  ReviewDoctorRequest,
 } from "@/types"
 
 // Specialties hooks
@@ -77,6 +76,7 @@ export function useClinics(
     city?: string
     category?: string
     is_active?: boolean
+    per_page?: number
   }
 ) {
   return useQuery({
@@ -167,6 +167,7 @@ export function useDoctors(
     city?: string
     is_verified?: boolean
     review_status?: string
+    per_page?: number
   }
 ) {
   return useQuery({
@@ -343,6 +344,7 @@ export function usePatients(
     gender?: string
     clinic_id?: number
     doctor_id?: number
+    per_page?: number
   }
 ) {
   return useQuery({
@@ -618,6 +620,20 @@ export function useUpdateAppointment() {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) =>
       healthcareService.updateAppointment(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["appointments"] })
+      queryClient.invalidateQueries({ queryKey: ["appointment", variables.id] })
+      queryClient.invalidateQueries({ queryKey: ["patient-appointments"] })
+    },
+  })
+}
+
+export function useUpdateAppointmentStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      healthcareService.updateAppointmentStatus(id, status),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] })
       queryClient.invalidateQueries({ queryKey: ["appointment", variables.id] })
@@ -1064,30 +1080,32 @@ export function useUnassignClinicFromCompany() {
   })
 }
 
-// Pending Review Doctors hooks
-export function usePendingReviewDoctors(
-  page: number = 1,
-  filters?: {
-    search?: string
-    specialty_id?: number
-  }
-) {
+// Searchable select hooks for appointment creation
+export function useSearchablePatients(search: string) {
   return useQuery({
-    queryKey: ["pending-review-doctors", page, filters],
-    queryFn: () => healthcareService.getPendingReviewDoctors(page, filters),
+    queryKey: ["searchable-patients", search],
+    queryFn: () => healthcareService.getPatients(1, { search, per_page: 50 }),
+    enabled: search.length > 0,
   })
 }
 
-export function useReviewDoctor() {
-  const queryClient = useQueryClient()
+export function useSearchableClinics(search: string) {
+  return useQuery({
+    queryKey: ["searchable-clinics", search],
+    queryFn: () => healthcareService.getClinics(1, { search, per_page: 50 }),
+    enabled: search.length > 0,
+  })
+}
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: ReviewDoctorRequest }) =>
-      healthcareService.reviewDoctor(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pending-review-doctors"] })
-      queryClient.invalidateQueries({ queryKey: ["doctors"] })
-    },
+export function useSearchableDoctors(search: string, clinicId?: number) {
+  return useQuery({
+    queryKey: ["searchable-doctors", search, clinicId],
+    queryFn: () => healthcareService.getDoctors(1, {
+      search,
+      clinic_id: clinicId,
+      per_page: 50
+    }),
+    enabled: search.length > 0,
   })
 }
 

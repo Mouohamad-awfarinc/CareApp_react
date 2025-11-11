@@ -20,17 +20,23 @@ export function EditAppointment() {
 
   const [formData, setFormData] = useState({
     appointment_date: "",
-    notes: "",
+    appointment_time: "",
+    duration_minutes: 15,
+    type: "in_clinic",
     status: "booked",
+    notes: "",
   })
   const [error, setError] = useState("")
 
   useEffect(() => {
     if (appointment) {
       setFormData({
-        appointment_date: appointment.appointment_date.slice(0, 16),
-        notes: appointment.notes || "",
+        appointment_date: appointment.appointment_date.split('T')[0], // Extract date part only
+        appointment_time: appointment.appointment_time.substring(0, 5), // Extract HH:MM part only
+        duration_minutes: appointment.duration_minutes || 15,
+        type: appointment.type || "in_clinic",
         status: appointment.status,
+        notes: appointment.notes || "",
       })
     }
   }, [appointment])
@@ -39,7 +45,7 @@ export function EditAppointment() {
     e.preventDefault()
     setError("")
 
-    if (!formData.appointment_date) {
+    if (!formData.appointment_date || !formData.appointment_time) {
       setError("Please fill in all required fields")
       return
     }
@@ -49,6 +55,9 @@ export function EditAppointment() {
         id: appointmentId,
         data: {
           appointment_date: formData.appointment_date,
+          appointment_time: formData.appointment_time,
+          duration_minutes: formData.duration_minutes,
+          type: formData.type,
           status: formData.status,
           notes: formData.notes || null,
         },
@@ -122,7 +131,7 @@ export function EditAppointment() {
           <Card>
             <CardHeader>
               <CardTitle>Update Appointment Details</CardTitle>
-              <CardDescription>Modify appointment date, time, status, and notes</CardDescription>
+              <CardDescription>Modify appointment details including date, time, duration, type, status, and notes</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {error && (
@@ -132,22 +141,67 @@ export function EditAppointment() {
               )}
 
               <div className="grid gap-4 md:grid-cols-2">
-                {/* Appointment Date & Time */}
+                {/* Appointment Date */}
                 <div className="grid gap-2">
-                  <Label htmlFor="appointment_date">Appointment Date & Time *</Label>
+                  <Label htmlFor="appointment_date">Appointment Date *</Label>
                   <Input
                     id="appointment_date"
-                    type="datetime-local"
+                    type="date"
                     value={formData.appointment_date}
                     onChange={(e) => setFormData({ ...formData, appointment_date: e.target.value })}
                     required
                   />
                 </div>
 
+                {/* Appointment Time */}
+                <div className="grid gap-2">
+                  <Label htmlFor="appointment_time">Appointment Time *</Label>
+                  <Input
+                    id="appointment_time"
+                    type="time"
+                    value={formData.appointment_time}
+                    onChange={(e) => setFormData({ ...formData, appointment_time: e.target.value })}
+                    required
+                  />
+                </div>
+
+                {/* Duration */}
+                <div className="grid gap-2">
+                  <Label htmlFor="duration_minutes">Duration (minutes)</Label>
+                  <Input
+                    id="duration_minutes"
+                    type="number"
+                    min="15"
+                    max="480"
+                    value={formData.duration_minutes}
+                    onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 15 })}
+                  />
+                </div>
+
+                {/* Type */}
+                <div className="grid gap-2">
+                  <Label htmlFor="type">Appointment Type</Label>
+                  <Select
+                    key={formData.type}
+                    value={formData.type}
+                    onValueChange={(value) => setFormData({ ...formData, type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="in_clinic">In Clinic</SelectItem>
+                      <SelectItem value="telemedicine">Telemedicine</SelectItem>
+                      <SelectItem value="home_visit">Home Visit</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Status */}
                 <div className="grid gap-2">
                   <Label htmlFor="status">Status</Label>
                   <Select
+                    key={formData.status}
                     value={formData.status}
                     onValueChange={(value) => setFormData({ ...formData, status: value })}
                   >

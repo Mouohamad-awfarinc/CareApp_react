@@ -13,18 +13,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ArrowLeft, AlertCircle } from "lucide-react"
-import { useCreateDoctor, useSpecialties } from "@/hooks/use-healthcare"
+import { useCreateDoctor } from "@/hooks/use-healthcare"
+import { SearchableSelect } from "@/components/ui/searchable-select"
+import { healthcareService } from "@/services/healthcare"
 import type { CreateDoctorRequest } from "@/types"
 
 export function CreateDoctor() {
   const navigate = useNavigate()
   const createDoctor = useCreateDoctor()
 
-  // Fetch specialties
-  const [specialtiesPage] = useState(1)
-  const { data: specialtiesData } = useSpecialties(specialtiesPage)
-
-  const specialties = specialtiesData?.data || []
+  const fetchSpecialties = async (search: string) => {
+    const response = await healthcareService.getSpecialties(1, { search })
+    return response.data
+  }
 
   const [doctorForm, setDoctorForm] = useState({
     user_name: "",
@@ -157,23 +158,12 @@ export function CreateDoctor() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="doctor-specialty">Specialty *</Label>
-                  <Select
+                  <SearchableSelect
+                    placeholder="Select a specialty"
                     value={doctorForm.specialty_id}
-                    onValueChange={(value) =>
-                      setDoctorForm({ ...doctorForm, specialty_id: value })
-                    }
-                  >
-                    <SelectTrigger id="doctor-specialty">
-                      <SelectValue placeholder="Select a specialty" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {specialties.map((specialty) => (
-                        <SelectItem key={specialty.id} value={specialty.id.toString()}>
-                          {specialty.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    onSelect={(value) => setDoctorForm({ ...doctorForm, specialty_id: value })}
+                    fetchData={fetchSpecialties}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="doctor-license">License Number</Label>

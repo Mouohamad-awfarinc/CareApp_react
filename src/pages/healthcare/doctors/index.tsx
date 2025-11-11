@@ -185,44 +185,47 @@ export function Doctors() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                          <div className="grid grid-cols-2 gap-2 w-fit ml-auto">
                             <Button
-                              variant="ghost"
-                              size="icon"
+                              variant="outline"
+                              size="sm"
                               onClick={() => navigate(`/healthcare/doctors/${doctor.id}/details`)}
-                              title="View Details"
                             >
-                              <Eye className="h-4 w-4" />
+                              <Eye className="mr-2 h-4 w-4" />
+                              View
                             </Button>
                             <Button
-                              variant="ghost"
-                              size="icon"
+                              variant="outline"
+                              size="sm"
                               onClick={() => navigate(`/healthcare/doctors/${doctor.id}/assign-clinics`)}
-                              title="Assign Clinics"
                             >
-                              <Building2 className="h-4 w-4" />
+                              <Building2 className="mr-2 h-4 w-4" />
+                              Assign Clinics
                             </Button>
                             <Button
-                              variant="ghost"
-                              size="icon"
+                              variant="outline"
+                              size="sm"
                               onClick={() => navigate(`/healthcare/doctors/${doctor.id}/schedule`)}
-                              title="Manage Schedule"
                             >
-                              <Calendar className="h-4 w-4" />
+                              <Calendar className="mr-2 h-4 w-4" />
+                              Schedule
                             </Button>
                             <Button
-                              variant="ghost"
-                              size="icon"
+                              variant="outline"
+                              size="sm"
                               onClick={() => navigate(`/healthcare/doctors/${doctor.id}/edit`)}
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
                             </Button>
                             <Button
-                              variant="ghost"
-                              size="icon"
+                              variant="outline"
+                              size="sm"
                               onClick={() => handleDeleteDoctor(doctor.id)}
+                              className="col-span-2"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
                             </Button>
                           </div>
                         </TableCell>

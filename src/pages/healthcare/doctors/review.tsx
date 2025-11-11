@@ -30,7 +30,7 @@ import {
   useReviewDoctor,
   useSpecialties,
 } from "@/hooks/use-healthcare"
-import { CheckCircle, XCircle, Eye, FileText } from "lucide-react"
+import { CheckCircle, XCircle, Eye, FileText, ArrowLeft } from "lucide-react"
 import type { Doctor } from "@/types"
 const getImageUrl = (photoPath: string | null) => {
   if (!photoPath) return ""
@@ -107,7 +107,10 @@ export function ReviewDoctors() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/healthcare/doctors")}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Doctor License Review</h1>
             <p className="text-muted-foreground">Review pending doctor license applications</p>

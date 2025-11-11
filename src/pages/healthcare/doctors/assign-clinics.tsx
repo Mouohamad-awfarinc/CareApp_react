@@ -1,27 +1,21 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { AppLayout } from "@/components/layout/app-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ArrowLeft, AlertCircle } from "lucide-react"
+import { ArrowLeft, AlertCircle, Edit, Trash2, Plus } from "lucide-react"
 import {
   useDoctor,
   useClinics,
   useAllDoctorClinics,
   useCreateDoctorClinic,
   useUpdateDoctorClinic,
+  useDeleteDoctorClinic,
 } from "@/hooks/use-healthcare"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
 import type { DoctorClinic } from "@/types"
-
-interface ClinicAssignment {
-  clinic_id: number
-  fees?: string
-  consultation_fees?: string
-  active: boolean
-}
 
 export function AssignClinics() {
   const navigate = useNavigate()
@@ -34,118 +28,89 @@ export function AssignClinics() {
   const { data: doctorClinicsData } = useAllDoctorClinics(1, { doctor_id: doctorId })
   const createDoctorClinic = useCreateDoctorClinic()
   const updateDoctorClinic = useUpdateDoctorClinic()
+  const deleteDoctorClinic = useDeleteDoctorClinic()
 
   const allClinics = allClinicsData?.data || []
-  const [clinicAssignments, setClinicAssignments] = useState<ClinicAssignment[]>([])
+  const existingAssociations = doctorClinicsData?.data || []
+  const [editingClinic, setEditingClinic] = useState<number | null>(null)
+  const [editFees, setEditFees] = useState("")
+  const [editConsultationFees, setEditConsultationFees] = useState("")
+  const [assigningClinic, setAssigningClinic] = useState<number | null>(null)
+  const [assignFees, setAssignFees] = useState("")
+  const [assignConsultationFees, setAssignConsultationFees] = useState("")
   const [error, setError] = useState("")
 
-  // Initialize clinic assignments when data is loaded
-  useEffect(() => {
-    const existingAssociations = doctorClinicsData?.data || []
-    if (existingAssociations.length > 0) {
-      const initialAssignments = existingAssociations.map((association) => ({
-        clinic_id: association.clinic?.id || 0,
-        fees: association.fees ? String(association.fees) : "",
-        consultation_fees: association.consultation_fees ? String(association.consultation_fees) : "",
-        active: association.active,
-      }))
-      console.log('Initialized assignments from existing data:', initialAssignments)
-      setClinicAssignments(initialAssignments)
-    }
-  }, [doctorClinicsData])
-
-  const handleToggleClinic = (clinicId: number, checked: boolean) => {
-    if (checked) {
-      // Add new assignment
-      setClinicAssignments((prev) => [
-        ...prev,
-        { clinic_id: clinicId, fees: "", consultation_fees: "", active: true }
-      ])
-    } else {
-      // Remove assignment
-      setClinicAssignments((prev) => prev.filter((a) => a.clinic_id !== clinicId))
-    }
+  const handleEditClinic = (association: DoctorClinic) => {
+    setEditingClinic(association.id)
+    setEditFees(association.fees ? String(association.fees) : "")
+    setEditConsultationFees(association.consultation_fees ? String(association.consultation_fees) : "")
   }
 
-  const handleFeesChange = (clinicId: number, field: 'fees' | 'consultation_fees', value: string) => {
-    setClinicAssignments((prev) =>
-      prev.map((assignment) =>
-        assignment.clinic_id === clinicId
-          ? { ...assignment, [field]: value }
-          : assignment
-      )
-    )
-  }
-
-  const isClinicSelected = (clinicId: number) => {
-    return clinicAssignments.some((a) => a.clinic_id === clinicId)
-  }
-
-  const getClinicAssignment = (clinicId: number) => {
-    return clinicAssignments.find((a) => a.clinic_id === clinicId)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const handleSaveEdit = async (associationId: number) => {
     try {
       setError("")
-      const existingAssociations = doctorClinicsData?.data || []
-
-      console.log('All clinic assignments:', clinicAssignments) // Debug log
-
-      // Create/update associations one by one
-      for (const assignment of clinicAssignments) {
-        console.log('Assignment object:', assignment) // Debug log
-        
-        // Check if this is an existing association
-        const existing = existingAssociations.find((a: DoctorClinic) => a.clinic?.id === assignment.clinic_id)
-
-        if (existing) {
-          // Update existing - only send fees, consultation_fees, and active
-          const updateData = {
-            fees: assignment.fees ? parseFloat(assignment.fees) : null,
-            consultation_fees: assignment.consultation_fees ? parseFloat(assignment.consultation_fees) : null,
-            active: assignment.active,
-          }
-          console.log('Updating existing association:', existing.id, updateData)
-          await updateDoctorClinic.mutateAsync({
-            id: existing.id,
-            data: updateData
-          })
-        } else {
-          // Create new - send doctor_id, clinic_id, fees, consultation_fees, and active
-          const createData = {
-            doctor_id: doctorId,
-            clinic_id: assignment.clinic_id,
-            fees: assignment.fees ? parseFloat(assignment.fees) : null,
-            consultation_fees: assignment.consultation_fees ? parseFloat(assignment.consultation_fees) : null,
-            active: assignment.active,
-          }
-          console.log('Creating new association:', createData)
-          await createDoctorClinic.mutateAsync(createData)
+      await updateDoctorClinic.mutateAsync({
+        id: associationId,
+        data: {
+          fees: editFees ? parseFloat(editFees) : null,
+          consultation_fees: editConsultationFees ? parseFloat(editConsultationFees) : null,
+          active: true,
         }
-      }
-
-      // Handle removals - any existing associations not in clinicAssignments should be deactivated
-      const toRemove = existingAssociations.filter(
-        (existing: DoctorClinic) => !clinicAssignments.some(a => a.clinic_id === existing.clinic?.id)
-      )
-
-      for (const association of toRemove) {
-        await updateDoctorClinic.mutateAsync({
-          id: association.id,
-          data: { 
-            fees: association.fees,
-            consultation_fees: association.consultation_fees,
-            active: false 
-          }
-        })
-      }
-
-      navigate("/healthcare/doctors")
+      })
+      setEditingClinic(null)
+      setEditFees("")
+      setEditConsultationFees("")
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to update clinic assignments"
+      const errorMessage = err instanceof Error ? err.message : "Failed to update clinic"
+      setError(errorMessage)
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingClinic(null)
+    setEditFees("")
+    setEditConsultationFees("")
+  }
+
+  const handleStartAssignClinic = (clinicId: number) => {
+    setAssigningClinic(clinicId)
+    setAssignFees("")
+    setAssignConsultationFees("")
+  }
+
+  const handleCancelAssign = () => {
+    setAssigningClinic(null)
+    setAssignFees("")
+    setAssignConsultationFees("")
+  }
+
+  const handleRemoveClinic = async (associationId: number) => {
+    if (confirm("Are you sure you want to remove this clinic assignment?")) {
+      try {
+        setError("")
+        await deleteDoctorClinic.mutateAsync(associationId)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to remove clinic assignment"
+        setError(errorMessage)
+      }
+    }
+  }
+
+  const handleAssignClinic = async (clinicId: number) => {
+    try {
+      setError("")
+      await createDoctorClinic.mutateAsync({
+        doctor_id: doctorId,
+        clinic_id: clinicId,
+        fees: assignFees ? parseFloat(assignFees) : null,
+        consultation_fees: assignConsultationFees ? parseFloat(assignConsultationFees) : null,
+        active: true,
+      })
+      setAssigningClinic(null)
+      setAssignFees("")
+      setAssignConsultationFees("")
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to assign clinic"
       setError(errorMessage)
     }
   }
@@ -184,104 +149,216 @@ export function AssignClinics() {
           </div>
         </div>
 
-        {/* Form Card */}
+        {/* Currently Assigned Clinics */}
         <Card>
           <CardHeader>
-            <CardTitle>Select Clinics</CardTitle>
+            <CardTitle>Currently Assigned Clinics</CardTitle>
             <CardDescription>
-              Choose which clinics this doctor should be associated with
+              Clinics currently assigned to {doctor.name}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
-                <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 text-destructive text-sm">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>{error}</span>
-                </div>
-              )}
+            {error && (
+              <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 text-destructive text-sm mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <span>{error}</span>
+              </div>
+            )}
 
+            {existingAssociations.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No clinics currently assigned
+              </div>
+            ) : (
               <div className="space-y-4">
-                {allClinics.length === 0 ? (
-                  <div className="text-center py-4 text-muted-foreground">
-                    No clinics available
-                  </div>
-                ) : (
-                  allClinics.map((clinic) => {
-                    const assignment = getClinicAssignment(clinic.id)
-                    const isSelected = isClinicSelected(clinic.id)
-
-                    return (
-                      <div key={clinic.id} className="border rounded-lg p-4 space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`clinic-${clinic.id}`}
-                            checked={isSelected}
-                            onCheckedChange={(checked) =>
-                              handleToggleClinic(clinic.id, checked === true)
-                            }
-                          />
-                          <Label
-                            htmlFor={`clinic-${clinic.id}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
-                          >
-                            {clinic.name} - {clinic.city || "No city"} ({clinic.category || "No category"})
-                          </Label>
+                {existingAssociations.map((association) => (
+                  <div key={association.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{association.clinic?.name}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {association.clinic?.city} • {association.clinic?.category}
+                        </p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <Badge variant={association.active ? "default" : "secondary"}>
+                            {association.active ? "Active" : "Inactive"}
+                          </Badge>
+                          {association.fees && (
+                            <span className="text-sm">Fees: ${association.fees}</span>
+                          )}
+                          {association.consultation_fees && (
+                            <span className="text-sm">Consultation: ${association.consultation_fees}</span>
+                          )}
                         </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditClinic(association)}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRemoveClinic(association.id)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
 
-                        {isSelected && (
-                          <div className="ml-6 grid grid-cols-2 gap-4">
+                    {editingClinic === association.id && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor={`edit-fees-${association.id}`}>Fees ($)</Label>
+                            <Input
+                              id={`edit-fees-${association.id}`}
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editFees}
+                              onChange={(e) => setEditFees(e.target.value)}
+                              placeholder="100.00"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor={`edit-consultation-${association.id}`}>Consultation Fees ($)</Label>
+                            <Input
+                              id={`edit-consultation-${association.id}`}
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editConsultationFees}
+                              onChange={(e) => setEditConsultationFees(e.target.value)}
+                              placeholder="50.00"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <Button
+                            size="sm"
+                            onClick={() => handleSaveEdit(association.id)}
+                            disabled={updateDoctorClinic.isPending}
+                          >
+                            {updateDoctorClinic.isPending ? "Saving..." : "Save"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleCancelEdit}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Available Clinics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Available Clinics</CardTitle>
+            <CardDescription>
+              Assign additional clinics to {doctor.name}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {allClinics.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No clinics available
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {allClinics
+                  .filter((clinic) => !existingAssociations.some((assoc) => assoc.clinic?.id === clinic.id))
+                  .map((clinic) => (
+                    <div key={clinic.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium">{clinic.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {clinic.city || "No city"} • {clinic.category || "No category"}
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStartAssignClinic(clinic.id)}
+                          disabled={createDoctorClinic.isPending}
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Assign
+                        </Button>
+                      </div>
+
+                      {assigningClinic === clinic.id && (
+                        <div className="mt-4 pt-4 border-t">
+                          <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor={`fees-${clinic.id}`}>Fees ($)</Label>
+                              <Label htmlFor={`assign-fees-${clinic.id}`}>Consultation Fees ($)</Label>
                               <Input
-                                id={`fees-${clinic.id}`}
+                                id={`assign-fees-${clinic.id}`}
                                 type="number"
                                 step="0.01"
                                 min="0"
-                                value={assignment?.fees || ""}
-                                onChange={(e) => handleFeesChange(clinic.id, 'fees', e.target.value)}
+                                value={assignFees}
+                                onChange={(e) => setAssignFees(e.target.value)}
                                 placeholder="100.00"
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor={`consultation-fees-${clinic.id}`}>Consultation Fees ($)</Label>
+                              <Label htmlFor={`assign-consultation-${clinic.id}`}>Follow-up Fees ($)</Label>
                               <Input
-                                id={`consultation-fees-${clinic.id}`}
+                                id={`assign-consultation-${clinic.id}`}
                                 type="number"
                                 step="0.01"
                                 min="0"
-                                value={assignment?.consultation_fees || ""}
-                                onChange={(e) => handleFeesChange(clinic.id, 'consultation_fees', e.target.value)}
+                                value={assignConsultationFees}
+                                onChange={(e) => setAssignConsultationFees(e.target.value)}
                                 placeholder="50.00"
                               />
                             </div>
                           </div>
-                        )}
-                      </div>
-                    )
-                  })
-                )}
+                          <div className="flex gap-2 mt-4">
+                            <Button
+                              size="sm"
+                              onClick={() => handleAssignClinic(clinic.id)}
+                              disabled={createDoctorClinic.isPending}
+                            >
+                              {createDoctorClinic.isPending ? "Assigning..." : "Confirm Assign"}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleCancelAssign}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
-
-              <div className="flex justify-end gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/healthcare/doctors")}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={createDoctorClinic.isPending || updateDoctorClinic.isPending}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                >
-                  {createDoctorClinic.isPending || updateDoctorClinic.isPending ? "Updating..." : "Update Clinic Assignments"}
-                </Button>
-              </div>
-            </form>
+            )}
           </CardContent>
         </Card>
+
+        <div className="flex justify-end">
+          <Button onClick={() => navigate("/healthcare/doctors")}>
+            Back to Doctors
+          </Button>
+        </div>
       </div>
     </AppLayout>
   )

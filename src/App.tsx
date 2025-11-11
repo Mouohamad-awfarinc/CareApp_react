@@ -8,6 +8,7 @@ import { NotFound } from "./pages/not-found"
 import { Unauthorized } from "./pages/unauthorized"
 import { Users } from "./pages/users"
 import { CreateUser } from "./pages/users/create"
+import { CreateReceptionist } from "./pages/users/create-receptionist"
 import { EditUser } from "./pages/users/edit"
 import { AssignRole } from "./pages/users/assign-role"
 import { AssignPermissions } from "./pages/users/assign-permissions"
@@ -63,6 +64,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreateUser />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/create-receptionist"
+            element={
+              <ProtectedRoute>
+                <CreateReceptionist />
               </ProtectedRoute>
             }
           />
