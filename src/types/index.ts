@@ -197,7 +197,10 @@ export interface Medicine {
   dosage_form: string | null
   strength: string | null
   manufacturer: string | null
-  category: string | null
+  active_ingredient: string | null
+  default_serving_times: string[] | null
+  default_duration: string | null
+  default_quantity: string | null
   is_active: boolean
   doctors_count?: number
   preferred_doctors_count?: number
@@ -474,7 +477,10 @@ export interface CreateMedicineRequest {
   dosage_form?: string | null
   strength?: string | null
   manufacturer?: string | null
-  category?: string | null
+  active_ingredient?: string | null
+  default_serving_times?: string[]
+  default_duration?: string | null
+  default_quantity?: string | null
   is_active?: boolean
 }
 
@@ -484,7 +490,10 @@ export interface UpdateMedicineRequest {
   dosage_form?: string | null
   strength?: string | null
   manufacturer?: string | null
-  category?: string | null
+  active_ingredient?: string | null
+  default_serving_times?: string[]
+  default_duration?: string | null
+  default_quantity?: string | null
   is_active?: boolean
 }
 

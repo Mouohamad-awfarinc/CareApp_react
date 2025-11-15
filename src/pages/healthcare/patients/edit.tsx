@@ -67,7 +67,7 @@ export function EditPatient() {
         address: patient.address || "",
         gender: patient.gender || "",
         national_id: patient.national_id || "",
-        birth_date: patient.birth_date || "",
+        birth_date: patient.birth_date ? new Date(patient.birth_date).toISOString().split('T')[0] : "",
         title: patient.title || "",
         occupation: patient.occupation || "",
         height: patient.height || "",

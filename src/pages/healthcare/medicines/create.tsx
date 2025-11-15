@@ -27,7 +27,10 @@ export function CreateMedicine() {
     dosage_form: "",
     strength: "",
     manufacturer: "",
-    category: "",
+    active_ingredient: "",
+    default_serving_times: [],
+    default_duration: "",
+    default_quantity: "",
     is_active: true,
   })
 
@@ -42,7 +45,7 @@ export function CreateMedicine() {
     }
   }
 
-  const handleInputChange = (field: keyof CreateMedicineRequest, value: string | boolean) => {
+  const handleInputChange = (field: keyof CreateMedicineRequest, value: string | boolean | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -115,12 +118,12 @@ export function CreateMedicine() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="active_ingredient">Active Ingredient</Label>
                   <Input
-                    id="category"
-                    value={formData.category || ""}
-                    onChange={(e) => handleInputChange("category", e.target.value)}
-                    placeholder="e.g., Antibiotic, Analgesic"
+                    id="active_ingredient"
+                    value={formData.active_ingredient || ""}
+                    onChange={(e) => handleInputChange("active_ingredient", e.target.value)}
+                    placeholder="e.g., Acetylsalicylic acid"
                   />
                 </div>
 
@@ -150,6 +153,40 @@ export function CreateMedicine() {
                   placeholder="Enter medicine description"
                   rows={4}
                 />
+              </div>
+
+              {/* Default Serving Instructions */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Default Serving Instructions</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="default_serving_times">Serving Times</Label>
+                    <Input
+                      id="default_serving_times"
+                      value={formData.default_serving_times?.join(", ") || ""}
+                      onChange={(e) => handleInputChange("default_serving_times", e.target.value.split(",").map(s => s.trim()).filter(Boolean))}
+                      placeholder="e.g., morning, evening"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="default_duration">Duration</Label>
+                    <Input
+                      id="default_duration"
+                      value={formData.default_duration || ""}
+                      onChange={(e) => handleInputChange("default_duration", e.target.value)}
+                      placeholder="e.g., 7 days"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="default_quantity">Quantity per Serving</Label>
+                    <Input
+                      id="default_quantity"
+                      value={formData.default_quantity || ""}
+                      onChange={(e) => handleInputChange("default_quantity", e.target.value)}
+                      placeholder="e.g., 1 tablet"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-end gap-4">

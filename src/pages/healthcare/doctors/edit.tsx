@@ -72,7 +72,7 @@ export function EditDoctor() {
         occupation: doctor.occupation || "",
         experience_years: doctor.experience_years?.toString() || "",
         gender: doctor.gender || "",
-        qualifications: doctor.qualifications?.join(", ") || "",
+        qualifications: Array.isArray(doctor.qualifications) ? doctor.qualifications.join(", ") : doctor.qualifications || "",
       })
     }
   }, [doctor])

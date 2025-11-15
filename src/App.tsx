@@ -31,8 +31,8 @@ import { Medicines } from "./pages/healthcare/medicines/index"
 import { CreateMedicine } from "./pages/healthcare/medicines/create"
 import { MedicineDetails } from "./pages/healthcare/medicines/details"
 import { EditMedicine } from "./pages/healthcare/medicines/edit"
-import { DoctorPreferredMedicines } from "./pages/healthcare/doctors/preferred-medicines"
 import { MyMedicines } from "./pages/healthcare/my-medicines"
+import { AddPreferredMedicines } from "./pages/healthcare/add-preferred-medicines"
 import { Toaster } from "./components/ui/toaster"
 
 function App() {
@@ -500,18 +500,18 @@ function App() {
             }
           />
           <Route
-            path="/healthcare/doctors/:id/preferred-medicines"
-            element={
-              <ProtectedRoute>
-                <DoctorPreferredMedicines />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/healthcare/my-medicines"
             element={
               <ProtectedRoute>
                 <MyMedicines />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthcare/add-preferred-medicines"
+            element={
+              <ProtectedRoute>
+                <AddPreferredMedicines />
               </ProtectedRoute>
             }
           />

@@ -88,9 +88,9 @@ export function MedicineDetails() {
                   <p className="text-sm">{medicine.manufacturer || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Category</p>
-                  {medicine.category ? (
-                    <Badge variant="secondary">{medicine.category}</Badge>
+                  <p className="text-sm font-medium text-muted-foreground">Active Ingredient</p>
+                  {medicine.active_ingredient ? (
+                    <Badge variant="secondary">{medicine.active_ingredient}</Badge>
                   ) : (
                     <p className="text-sm">—</p>
                   )}
@@ -112,11 +112,39 @@ export function MedicineDetails() {
           </Card>
         </div>
 
+        {/* Default Serving Instructions */}
+        {(medicine.default_serving_times?.length || medicine.default_duration || medicine.default_quantity) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Default Serving Instructions</CardTitle>
+              <CardDescription>Recommended usage guidelines</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Serving Times</p>
+                  <p className="text-sm">
+                    {medicine.default_serving_times?.length ? medicine.default_serving_times.join(", ") : "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Duration</p>
+                  <p className="text-sm">{medicine.default_duration || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Quantity per Serving</p>
+                  <p className="text-sm">{medicine.default_quantity || "—"}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Additional Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Additional Details</CardTitle>
-            <CardDescription>Timestamps and metadata</CardDescription>
+            <CardTitle>Additional Information</CardTitle>
+            <CardDescription>Metadata and timestamps</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

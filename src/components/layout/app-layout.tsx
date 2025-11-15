@@ -111,6 +111,15 @@ export function AppLayout({ children }: AppLayoutProps) {
                       )}
                     </NavLink>
                   </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <NavLink to="/healthcare/medicines">
+                      {({ isActive }) => (
+                        <SidebarMenuSubButton asChild isActive={isActive}>
+                          <span>Medicines</span>
+                        </SidebarMenuSubButton>
+                      )}
+                    </NavLink>
+                  </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>
             </Collapsible>
@@ -200,15 +209,6 @@ export function AppLayout({ children }: AppLayoutProps) {
                       {({ isActive }) => (
                         <SidebarMenuSubButton asChild isActive={isActive}>
                           <span>Lab Tests</span>
-                        </SidebarMenuSubButton>
-                      )}
-                    </NavLink>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <NavLink to="/healthcare/medicines">
-                      {({ isActive }) => (
-                        <SidebarMenuSubButton asChild isActive={isActive}>
-                          <span>Medicines</span>
                         </SidebarMenuSubButton>
                       )}
                     </NavLink>

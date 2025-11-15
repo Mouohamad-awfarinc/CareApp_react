@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate, useParams } from "react-router-dom"
 import { AppLayout } from "@/components/layout/app-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -190,18 +191,22 @@ export function PatientDetails() {
                             </div>
                           )}
                         </div>
-                        {profile.allergies && profile.allergies.length > 0 && (
-                          <div className="mt-2">
-                            <p className="text-xs font-medium text-muted-foreground">Allergies</p>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {profile.allergies.map((item, idx) => (
-                                <span key={idx} className="px-2 py-0.5 text-xs rounded bg-red-100 dark:bg-red-900">
-                                  {item}
-                                </span>
-                              ))}
+                        {(() => {
+                          const allergies = profile.allergies as any
+                          const allergiesArray = Array.isArray(allergies) ? allergies : (typeof allergies === 'string' && allergies ? allergies.split(',').map((s: string) => s.trim()) : [])
+                          return allergiesArray.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-xs font-medium text-muted-foreground">Allergies</p>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {allergiesArray.map((item: string, idx: number) => (
+                                  <span key={idx} className="px-2 py-0.5 text-xs rounded bg-red-100 dark:bg-red-900">
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )
+                        })()}
                       </div>
                     ))}
                   </div>

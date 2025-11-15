@@ -135,7 +135,7 @@ export function DoctorDetails() {
               </div>
               <div className="md:col-span-2">
                 <p className="text-sm font-medium text-muted-foreground">Qualifications</p>
-                <p className="text-sm">{doctor.qualifications?.join(", ") || "—"}</p>
+                <p className="text-sm">{Array.isArray(doctor.qualifications) ? doctor.qualifications.join(", ") : doctor.qualifications || "—"}</p>
               </div>
             </div>
           </CardContent>
@@ -176,8 +176,8 @@ export function DoctorDetails() {
                           "—"
                         )}
                       </TableCell>
-                      <TableCell>{association.fees ? `$${association.fees.toFixed(2)}` : "—"}</TableCell>
-                      <TableCell>{association.consultation_fees ? `$${association.consultation_fees.toFixed(2)}` : "—"}</TableCell>
+                      <TableCell>{association.fees && !isNaN(Number(association.fees)) ? `$${Number(association.fees).toFixed(2)}` : "—"}</TableCell>
+                      <TableCell>{association.consultation_fees && !isNaN(Number(association.consultation_fees)) ? `$${Number(association.consultation_fees).toFixed(2)}` : "—"}</TableCell>
                       <TableCell>
                         <Badge variant={association.active ? "default" : "secondary"}>
                           {association.active ? "Active" : "Inactive"}

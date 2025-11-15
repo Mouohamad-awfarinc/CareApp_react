@@ -34,22 +34,22 @@ export function Medicines() {
   // Search and filters
   const [searchQuery, setSearchQuery] = useState("")
   const debouncedSearch = useDebounce(searchQuery, 500)
-  const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [activeIngredientFilter, setActiveIngredientFilter] = useState<string>("all")
   const [dosageFormFilter, setDosageFormFilter] = useState<string>("all")
 
   // Medicines
   const [medicinesPage, setMedicinesPage] = useState(1)
   const { data: medicinesData, isLoading: loadingMedicines } = useMedicines(medicinesPage, {
     search: debouncedSearch || undefined,
-    category: categoryFilter !== "all" ? categoryFilter : undefined,
+    active_ingredient: activeIngredientFilter !== "all" ? activeIngredientFilter : undefined,
     dosage_form: dosageFormFilter !== "all" ? dosageFormFilter : undefined,
   })
   const deleteMedicine = useDeleteMedicine()
 
   const medicines = medicinesData?.data || []
 
-  // Get unique categories and dosage forms for filters
-  const categories = [...new Set(medicines.map(m => m.category).filter((c): c is string => c !== null))]
+  // Get unique active ingredients for filter
+  const activeIngredients = [...new Set(medicines.map(m => m.active_ingredient).filter((ai): ai is string => ai !== null))]
   const dosageForms = [...new Set(medicines.map(m => m.dosage_form).filter((d): d is string => d !== null))]
 
   const handleDeleteMedicine = async (id: number) => {
@@ -93,15 +93,15 @@ export function Medicines() {
                 value={searchQuery}
                 onChange={setSearchQuery}
               />
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <Select value={activeIngredientFilter} onValueChange={setActiveIngredientFilter}>
                 <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Filter by category" />
+                  <SelectValue placeholder="Filter by active ingredient" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
+                  <SelectItem value="all">All Active Ingredients</SelectItem>
+                  {activeIngredients.map((activeIngredient) => (
+                    <SelectItem key={activeIngredient} value={activeIngredient}>
+                      {activeIngredient}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -133,7 +133,7 @@ export function Medicines() {
                       <TableHead>Name</TableHead>
                       <TableHead>Dosage Form</TableHead>
                       <TableHead>Strength</TableHead>
-                      <TableHead>Category</TableHead>
+                      <TableHead>Active Ingredient</TableHead>
                       <TableHead>Manufacturer</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -146,8 +146,8 @@ export function Medicines() {
                         <TableCell>{medicine.dosage_form || "—"}</TableCell>
                         <TableCell>{medicine.strength || "—"}</TableCell>
                         <TableCell>
-                          {medicine.category ? (
-                            <Badge variant="secondary">{medicine.category}</Badge>
+                          {medicine.active_ingredient ? (
+                            <Badge variant="secondary">{medicine.active_ingredient}</Badge>
                           ) : (
                             "—"
                           )}

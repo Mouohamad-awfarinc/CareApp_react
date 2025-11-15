@@ -882,7 +882,7 @@ export function useMedicines(
   page: number = 1,
   filters?: {
     search?: string
-    category?: string
+    active_ingredient?: string
     dosage_form?: string
     manufacturer?: string
     is_active?: boolean
