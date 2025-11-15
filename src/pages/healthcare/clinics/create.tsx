@@ -16,6 +16,7 @@ import { ArrowLeft, AlertCircle } from "lucide-react"
 import { useCreateClinic } from "@/hooks/use-healthcare"
 import type { CreateClinicRequest } from "@/types"
 import { CountryDropdown, RegionDropdown } from "react-country-region-selector"
+import { LocationPickerWrapper } from "@/components/location-picker-wrapper"
 
 export function CreateClinic() {
   const navigate = useNavigate()
@@ -37,6 +38,14 @@ export function CreateClinic() {
   })
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [error, setError] = useState("")
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setClinicForm(prev => ({
+      ...prev,
+      latitude: lat.toString(),
+      longitude: lng.toString(),
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -213,22 +222,13 @@ export function CreateClinic() {
                     placeholder="123 Medical St"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="clinic-longitude">Longitude</Label>
-                  <Input
-                    id="clinic-longitude"
-                    value={clinicForm.longitude}
-                    onChange={(e) => setClinicForm({ ...clinicForm, longitude: e.target.value })}
-                    placeholder="-74.0060"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="clinic-latitude">Latitude</Label>
-                  <Input
-                    id="clinic-latitude"
-                    value={clinicForm.latitude}
-                    onChange={(e) => setClinicForm({ ...clinicForm, latitude: e.target.value })}
-                    placeholder="40.7128"
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Location</Label>
+                  <LocationPickerWrapper
+                    latitude={clinicForm.latitude ? parseFloat(clinicForm.latitude) : undefined}
+                    longitude={clinicForm.longitude ? parseFloat(clinicForm.longitude) : undefined}
+                    onChange={handleLocationChange}
+                    placeholder="Search for clinic location..."
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">

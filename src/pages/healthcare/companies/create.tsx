@@ -10,6 +10,7 @@ import { ArrowLeft, AlertCircle } from "lucide-react"
 import { useCreateCompany } from "@/hooks/use-healthcare"
 import type { CreateCompanyRequest } from "@/types"
 import { CountryDropdown, RegionDropdown } from "react-country-region-selector"
+import { LocationPickerWrapper } from "@/components/location-picker-wrapper"
 
 export function CreateCompany() {
   const navigate = useNavigate()
@@ -32,6 +33,14 @@ export function CreateCompany() {
   })
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [error, setError] = useState("")
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setCompanyForm(prev => ({
+      ...prev,
+      latitude: lat.toString(),
+      longitude: lng.toString(),
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -198,22 +207,13 @@ export function CreateCompany() {
                     placeholder="123 Business St"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company-longitude">Longitude</Label>
-                  <Input
-                    id="company-longitude"
-                    value={companyForm.longitude}
-                    onChange={(e) => setCompanyForm({ ...companyForm, longitude: e.target.value })}
-                    placeholder="-74.0060"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company-latitude">Latitude</Label>
-                  <Input
-                    id="company-latitude"
-                    value={companyForm.latitude}
-                    onChange={(e) => setCompanyForm({ ...companyForm, latitude: e.target.value })}
-                    placeholder="40.7128"
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Location</Label>
+                  <LocationPickerWrapper
+                    latitude={companyForm.latitude ? parseFloat(companyForm.latitude) : undefined}
+                    longitude={companyForm.longitude ? parseFloat(companyForm.longitude) : undefined}
+                    onChange={handleLocationChange}
+                    placeholder="Search for company location..."
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">

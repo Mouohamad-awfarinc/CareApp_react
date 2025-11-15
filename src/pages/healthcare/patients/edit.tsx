@@ -10,6 +10,7 @@ import { ArrowLeft } from "lucide-react"
 import { usePatient, useUpdatePatient, useUpdatePatientFile } from "@/hooks/use-healthcare"
 import { useUsers } from "@/hooks/use-users"
 import { CountryDropdown, RegionDropdown } from "react-country-region-selector"
+import { LocationPickerWrapper } from "@/components/location-picker-wrapper"
 
 export function EditPatient() {
   const navigate = useNavigate()
@@ -49,6 +50,14 @@ export function EditPatient() {
   })
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [error, setError] = useState("")
+
+  const handleLocationChange = (lat: number, lng: number) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: lat.toString(),
+      longitude: lng.toString(),
+    }))
+  }
 
   useEffect(() => {
     if (patient) {
@@ -394,25 +403,15 @@ export function EditPatient() {
                 </div>
               </div>
 
-              {/* Location Coordinates */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="grid gap-2">
-                  <Label htmlFor="longitude">Longitude</Label>
-                  <Input
-                    id="longitude"
-                    value={formData.longitude}
-                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="latitude">Latitude</Label>
-                  <Input
-                    id="latitude"
-                    value={formData.latitude}
-                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                  />
-                </div>
+              {/* Location */}
+              <div className="grid gap-2">
+                <Label>Location</Label>
+                <LocationPickerWrapper
+                  latitude={formData.latitude ? parseFloat(formData.latitude) : undefined}
+                  longitude={formData.longitude ? parseFloat(formData.longitude) : undefined}
+                  onChange={handleLocationChange}
+                  placeholder="Search for patient location..."
+                />
               </div>
 
               {/* Photo Upload */}
